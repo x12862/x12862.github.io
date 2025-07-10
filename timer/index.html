@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10/2 и 5/4 таймер</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            margin: 20px;
+            box-sizing: border-box;
+            transition: background-color 0.5s;
+        }
+        .timer {
+            font-size: 30vmin;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .info {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            font-size: 4vmin;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .controls button, .controls select {
+            padding: 20px 40px;
+            font-size: 4vmin;
+            cursor: pointer;
+        }
+        .interval-text {
+            font-size: 8vmin;
+            margin: 20px 0;
+            text-align: center;
+            width: 100%;
+        }
+        .randomize-btn {
+            font-size: 4vmin;
+            padding: 20px 40px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="interval-text" id="intervalText">Приготовиться!</div>
+    <div class="timer" id="timer">00:05</div>
+    <div class="info">
+        <div id="elapsedTime">Время: 00:00</div>
+        <div id="currentInterval">Интервал: 0/8</div>
+        <div id="remainingTime">Осталось: 06:00</div>
+    </div>
+    <div class="controls">
+        <select id="iterationsSelect">
+            <option value="3">3 блока</option>
+            <option value="4">4 блока</option>
+            <option value="5">5 блоков</option>
+        </select>
+        <select id="seriesSelect">
+            <option value="5_4">Серия 5/4</option>
+            <option value="10_2">Серия 10/2</option>
+            <option value="Alternate">Поочерёдно</option>
+        </select>
+        <select id="pullExerciseSelect">
+            <option value="5 LH Pulls/5 RH Pulls">Махи л/п</option>
+            <option value="5 Two-Handed Pulls">Двумя</option>
+        </select>
+        <select id="pushExerciseSelect">
+            <option value="5 Pushups">Отжимания</option>
+            <option value="5 Knuckle Pushups">На кулаках</option>
+        </select>
+        <button id="startBtn">Начать!</button>
+        <button id="randomizeBtn" class="randomize-btn">🎲</button>
+    </div>
+
+    <audio id="beepSound" preload="auto">
+        <source src="beep.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio id="beepSound2" preload="auto">
+        <source src="beep2.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        let exercises = [
+            { text: "5 LH Pulls", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 RH Pulls", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 LH Pulls", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 RH Pulls", prep: 5, exercise: 10, rest: 75 },
+            { text: "5 Pushups", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 Pushups", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 Pushups", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 Pushups", prep: 5, exercise: 10, rest: 75 }
+        ];
+
+        let exercises_10_2 = [
+            { text: "10 LH Pulls", prep: 5, exercise: 20, rest: 35 },
+            { text: "10 RH Pulls", prep: 5, exercise: 20, rest: 95 },
+            { text: "10 Pushups", prep: 5, exercise: 20, rest: 35 },
+            { text: "10 Pushups", prep: 5, exercise: 20, rest: 95 }
+        ];
+
+        const defaultExercises = JSON.parse(JSON.stringify(exercises));
+        const defaultExercises_10_2 = JSON.parse(JSON.stringify(exercises_10_2));
+
+        let currentInterval = 0;
+        let phase = 0; // 0 = prep, 1 = exercise, 2 = rest
+        let timeRemaining = exercises[0].prep;
+        let totalTimeElapsed = 0;
+        let timerInterval;
+        let iterations = 1;
+        let currentIteration = 1;
+        const timerElement = document.getElementById('timer');
+        const elapsedTimeElement = document.getElementById('elapsedTime');
+        const currentIntervalElement = document.getElementById('currentInterval');
+        const remainingTimeElement = document.getElementById('remainingTime');
+        const intervalTextElement = document.getElementById('intervalText');
+        const startBtn = document.getElementById('startBtn');
+        const iterationsSelect = document.getElementById('iterationsSelect');
+        const seriesSelect = document.getElementById('seriesSelect');
+        const pullExerciseSelect = document.getElementById('pullExerciseSelect');
+        const pushExerciseSelect = document.getElementById('pushExerciseSelect');
+        const randomizeBtn = document.getElementById('randomizeBtn');
+        const beepSound = document.getElementById('beepSound');
+        const beepSound2 = document.getElementById('beepSound2');
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateElapsedTimeDisplay() {
+            const minutes = Math.floor(totalTimeElapsed / 60);
+            const seconds = totalTimeElapsed % 60;
+            elapsedTimeElement.textContent = `Elapsed: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateRemainingTimeDisplay() {
+            const remainingTime = iterations * 6 * 60 - totalTimeElapsed;
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            remainingTimeElement.textContent = `Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateIntervalCounter() {
+            currentIntervalElement.textContent = `Interval: ${currentInterval + 1}/${exercises.length}`;
+        }
+
+        function changeBackgroundColor() {
+            if (phase === 0) {
+                document.body.style.backgroundColor = "#ffff00";
+            } else if (phase === 1) {
+                document.body.style.backgroundColor = "#ff0000";
+            } else {
+                document.body.style.backgroundColor = "#00ff00";
+            }
+        }
+
+        function startNextPhase() {
+            const exercise = exercises[currentInterval];
+            if (phase === 0) {
+                intervalTextElement.textContent = exercise.text;
+                timeRemaining = exercise.exercise;
+                phase = 1;
+                beepSound.play().catch(error => console.log("Audio play error: ", error));
+            } else if (phase === 1) {
+                intervalTextElement.textContent = "Rest";
+                timeRemaining = exercise.rest;
+                phase = 2;
+            } else {
+                currentInterval++;
+                if (currentInterval < exercises.length) {
+                    intervalTextElement.textContent = exercises[currentInterval].text;
+                    timeRemaining = exercises[currentInterval].prep;
+                    phase = 0;
+                } else if (currentIteration < iterations) {
+                    currentIteration++;
+                    currentInterval = 0;
+                    updateExercises();
+                    intervalTextElement.textContent = exercises[currentInterval].text;
+                    timeRemaining = exercises[currentInterval].prep;
+                    phase = 0;
+                } else {
+                    beepSound2.play().catch(error => console.log("Audio play error: ", error));
+                    clearInterval(timerInterval);
+                    return;
+                }
+            }
+            changeBackgroundColor();
+            updateIntervalCounter();
+        }
+
+        function updateExercises() {
+            const seriesChoice = seriesSelect.value;
+            if (seriesChoice === '10_2') {
+                exercises = JSON.parse(JSON.stringify(exercises_10_2));
+            } else if (seriesChoice === '5_4') {
+                exercises = JSON.parse(JSON.stringify(defaultExercises));
+            } else if (seriesChoice === 'Alternate') {
+                if (currentIteration % 2 === 0) {
+                    exercises = JSON.parse(JSON.stringify(exercises_10_2));
+                } else {
+                    exercises = JSON.parse(JSON.stringify(defaultExercises));
+                }
+            }
+            
+            const pullChoice = pullExerciseSelect.value;
+            const pushChoice = pushExerciseSelect.value;
+
+            if (seriesChoice === '10_2' || (seriesChoice === 'Alternate' && currentIteration % 2 === 0)) {
+                if (pullChoice.includes("Two-Handed Pulls")) {
+                    exercises.forEach(exercise => {
+                        if (exercise.text.includes("Pulls")) {
+                            exercise.text = pullChoice.replace('5', '10');
+                        }
+                    });
+                }
+                exercises.forEach(exercise => {
+                    if (exercise.text.includes("Pushups")) {
+                        exercise.text = pushChoice.replace('5', '10');
+                    }
+                });
+            } else {
+                if (pullChoice.includes("Two-Handed Pulls")) {
+                    exercises.forEach(exercise => {
+                        if (exercise.text.includes("Pulls")) {
+                            exercise.text = pullChoice;
+                        }
+                    });
+                }
+                exercises.forEach(exercise => {
+                    if (exercise.text.includes("Pushups")) {
+                        exercise.text = pushChoice;
+                    }
+                });
+            }
+        }
+
+        function randomizeSelections() {
+            const iterationOptions = iterationsSelect.options;
+            const seriesOptions = seriesSelect.options;
+            const pullExerciseOptions = pullExerciseSelect.options;
+            const pushExerciseOptions = pushExerciseSelect.options;
+
+            iterationsSelect.selectedIndex = Math.floor(Math.random() * iterationOptions.length);
+            seriesSelect.selectedIndex = Math.floor(Math.random() * seriesOptions.length);
+            pullExerciseSelect.selectedIndex = Math.floor(Math.random() * pullExerciseOptions.length);
+            pushExerciseSelect.selectedIndex = Math.floor(Math.random() * pushExerciseOptions.length);
+        }
+
+        function startTimer() {
+            if (currentInterval < exercises.length) {
+                timerInterval = setInterval(() => {
+                    if (timeRemaining > 0) {
+                        timeRemaining--;
+                        totalTimeElapsed++;
+                        updateTimerDisplay();
+                        updateElapsedTimeDisplay();
+                        updateRemainingTimeDisplay();
+                    } else {
+                        startNextPhase();
+                    }
+                }, 1000);
+            }
+        }
+
+        randomizeBtn.addEventListener('click', randomizeSelections);
+
+        startBtn.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            iterations = parseInt(iterationsSelect.value, 10);
+            currentIteration = 1;
+            currentInterval = 0;
+            phase = 0;
+            timeRemaining = exercises[0].prep;
+            totalTimeElapsed = 0;
+            updateExercises();
+            intervalTextElement.textContent = exercises[0].text;
+            document.body.style.backgroundColor = "#ffff00";
+            updateTimerDisplay();
+            updateElapsedTimeDisplay();
+            updateRemainingTimeDisplay();
+            updateIntervalCounter();
+            startTimer();
+        });
+
+        updateTimerDisplay();
+        updateElapsedTimeDisplay();
+        updateRemainingTimeDisplay();
+        updateIntervalCounter();
+        intervalTextElement.textContent = exercises[0].text;
+        document.body.style.backgroundColor = "#ffff00";
+    </script>
+</body>
+</html>

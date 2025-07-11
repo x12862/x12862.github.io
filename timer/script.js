@@ -33,7 +33,7 @@ function showResultButton(result) {
         setupButton.textContent = 'Setup Training';
         setupButton.classList.add('result-button'); // Add class for styling
         setupButton.addEventListener('click', () => {
-            window.location.href = 'timerH.php'; 
+            window.location.href = 'index.html'; 
         });
         resultContainer.appendChild(setupButton);
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interval Timer</title>
+    <title>10/2 and 5/4 Timer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,8 +53,8 @@
     </style>
 </head>
 <body>
-    <div class="interval-text" id="intervalText">Get ready</div>
-    <div class="timer" id="timer">00:05</div>
+    <div class="interval-text" id="intervalText">Get ready!</div>
+    <div class="timer" id="timer">00:00</div>
     <div class="info">
         <div id="elapsedTime">Elapsed: 00:00</div>
         <div id="currentInterval">Interval: 0/8</div>
@@ -72,14 +72,15 @@
             <option value="Alternate">Alternate</option>
         </select>
         <select id="pullExerciseSelect">
-            <option value="5 LH Pulls/5 RH Pulls">LH/RH Pulls</option>
-            <option value="5 Two-Handed Pulls">2H Pulls</option>
+            <option value="LH/RH Pulls">LH/RH Pulls</option>
+            <option value="Two-Handed Pulls">Two-Handed Pulls</option>
         </select>
         <select id="pushExerciseSelect">
-            <option value="5 Pushups">Pushups</option>
-            <option value="5 Knuckle Pushups">Knuckle Pushups</option>
+            <option value="Pushups">Pushups</option>
+            <option value="Knuckle Pushups">Knuckle Pushups</option>
         </select>
-        <button id="startBtn">Start</button>
+        <button id="startBtn">Start!</button>
+        <button id="resetBtn">Reset</button>
         <button id="randomizeBtn" class="randomize-btn">🎲</button>
     </div>
 
@@ -115,18 +116,20 @@
         const defaultExercises_10_2 = JSON.parse(JSON.stringify(exercises_10_2));
 
         let currentInterval = 0;
-        let phase = 0; // 0 = prep, 1 = exercise, 2 = rest
-        let timeRemaining = exercises[0].prep;
+        let phase = 0; // 0 = prep, 1 = exercise, 2 = rest, 3 = finished
+        let timeRemaining = 0;
         let totalTimeElapsed = 0;
-        let timerInterval;
+        let timerInterval = null;
         let iterations = 1;
         let currentIteration = 1;
+        let isRunning = false;
         const timerElement = document.getElementById('timer');
         const elapsedTimeElement = document.getElementById('elapsedTime');
         const currentIntervalElement = document.getElementById('currentInterval');
         const remainingTimeElement = document.getElementById('remainingTime');
         const intervalTextElement = document.getElementById('intervalText');
         const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
         const iterationsSelect = document.getElementById('iterationsSelect');
         const seriesSelect = document.getElementById('seriesSelect');
         const pullExerciseSelect = document.getElementById('pullExerciseSelect');
@@ -163,12 +166,16 @@
                 document.body.style.backgroundColor = "#ffff00";
             } else if (phase === 1) {
                 document.body.style.backgroundColor = "#ff0000";
-            } else {
+            } else if (phase === 2) {
                 document.body.style.backgroundColor = "#00ff00";
+            } else {
+                document.body.style.backgroundColor = "#f5f5f5";
             }
         }
 
         function startNextPhase() {
+            if (phase === 3) return;
+
             const exercise = exercises[currentInterval];
             if (phase === 0) {
                 intervalTextElement.textContent = exercise.text;
@@ -195,22 +202,32 @@
                 } else {
                     beepSound2.play().catch(error => console.log("Audio play error: ", error));
                     clearInterval(timerInterval);
-                    return;
+                    timerInterval = null;
+                    phase = 3;
+                    intervalTextElement.textContent = "Completed!";
+                    timeRemaining = 0;
+                    isRunning = false;
+                    startBtn.textContent = "Start!";
+                    enableControls();
                 }
             }
             changeBackgroundColor();
             updateIntervalCounter();
+            updateTimerDisplay();
         }
 
         function updateExercises() {
             const seriesChoice = seriesSelect.value;
+            let isTenTwo = false;
             if (seriesChoice === '10_2') {
-                exercises = JSON.parse(JSON.stringify(exercises_10_2));
+                exercises = JSON.parse(JSON.stringify(defaultExercises_10_2));
+                isTenTwo = true;
             } else if (seriesChoice === '5_4') {
                 exercises = JSON.parse(JSON.stringify(defaultExercises));
             } else if (seriesChoice === 'Alternate') {
                 if (currentIteration % 2 === 0) {
-                    exercises = JSON.parse(JSON.stringify(exercises_10_2));
+                    exercises = JSON.parse(JSON.stringify(defaultExercises_10_2));
+                    isTenTwo = true;
                 } else {
                     exercises = JSON.parse(JSON.stringify(defaultExercises));
                 }
@@ -219,32 +236,31 @@
             const pullChoice = pullExerciseSelect.value;
             const pushChoice = pushExerciseSelect.value;
 
-            if (seriesChoice === '10_2' || (seriesChoice === 'Alternate' && currentIteration % 2 === 0)) {
-                if (pullChoice.includes("Two-Handed Pulls")) {
-                    exercises.forEach(exercise => {
-                        if (exercise.text.includes("Pulls")) {
-                            exercise.text = pullChoice.replace('5', '10');
-                        }
-                    });
+            const num = isTenTwo ? 10 : 5;
+            const pullCount = isTenTwo ? 2 : 4;
+            const pushCount = isTenTwo ? 2 : 4;
+
+            let pullTexts = [];
+            if (pullChoice === "Two-Handed Pulls") {
+                const pullText = `${num} Two-Handed Pulls`;
+                for (let i = 0; i < pullCount; i++) {
+                    pullTexts.push(pullText);
                 }
-                exercises.forEach(exercise => {
-                    if (exercise.text.includes("Pushups")) {
-                        exercise.text = pushChoice.replace('5', '10');
-                    }
-                });
             } else {
-                if (pullChoice.includes("Two-Handed Pulls")) {
-                    exercises.forEach(exercise => {
-                        if (exercise.text.includes("Pulls")) {
-                            exercise.text = pullChoice;
-                        }
-                    });
+                const leftText = `${num} LH Pulls`;
+                const rightText = `${num} RH Pulls`;
+                for (let i = 0; i < pullCount; i++) {
+                    pullTexts.push(i % 2 === 0 ? leftText : rightText);
                 }
-                exercises.forEach(exercise => {
-                    if (exercise.text.includes("Pushups")) {
-                        exercise.text = pushChoice;
-                    }
-                });
+            }
+
+            const pushText = `${num} ${pushChoice}`;
+
+            for (let i = 0; i < pullCount; i++) {
+                exercises[i].text = pullTexts[i];
+            }
+            for (let i = 0; i < pushCount; i++) {
+                exercises[pullCount + i].text = pushText;
             }
         }
 
@@ -261,47 +277,92 @@
         }
 
         function startTimer() {
-            if (currentInterval < exercises.length) {
-                timerInterval = setInterval(() => {
-                    if (timeRemaining > 0) {
-                        timeRemaining--;
-                        totalTimeElapsed++;
-                        updateTimerDisplay();
-                        updateElapsedTimeDisplay();
-                        updateRemainingTimeDisplay();
-                    } else {
-                        startNextPhase();
-                    }
-                }, 1000);
-            }
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeRemaining > 0) {
+                    timeRemaining--;
+                    totalTimeElapsed++;
+                    updateTimerDisplay();
+                    updateElapsedTimeDisplay();
+                    updateRemainingTimeDisplay();
+                } else {
+                    startNextPhase();
+                }
+            }, 1000);
+        }
+
+        function disableControls() {
+            iterationsSelect.disabled = true;
+            seriesSelect.disabled = true;
+            pullExerciseSelect.disabled = true;
+            pushExerciseSelect.disabled = true;
+            randomizeBtn.disabled = true;
+        }
+
+        function enableControls() {
+            iterationsSelect.disabled = false;
+            seriesSelect.disabled = false;
+            pullExerciseSelect.disabled = false;
+            pushExerciseSelect.disabled = false;
+            randomizeBtn.disabled = false;
         }
 
         randomizeBtn.addEventListener('click', randomizeSelections);
 
         startBtn.addEventListener('click', () => {
+            if (startBtn.textContent === "Start!") {
+                iterations = parseInt(iterationsSelect.value, 10);
+                currentIteration = 1;
+                currentInterval = 0;
+                phase = 0;
+                totalTimeElapsed = 0;
+                updateExercises();
+                timeRemaining = exercises[0].prep;
+                intervalTextElement.textContent = exercises[0].text;
+                changeBackgroundColor();
+                updateTimerDisplay();
+                updateElapsedTimeDisplay();
+                updateRemainingTimeDisplay();
+                updateIntervalCounter();
+                startTimer();
+                startBtn.textContent = "Pause";
+                isRunning = true;
+                disableControls();
+            } else if (startBtn.textContent === "Pause") {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                startBtn.textContent = "Resume";
+                isRunning = false;
+            } else {
+                startTimer();
+                startBtn.textContent = "Pause";
+                isRunning = true;
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
             clearInterval(timerInterval);
-            iterations = parseInt(iterationsSelect.value, 10);
-            currentIteration = 1;
+            timerInterval = null;
             currentInterval = 0;
             phase = 0;
-            timeRemaining = exercises[0].prep;
+            timeRemaining = 0;
             totalTimeElapsed = 0;
-            updateExercises();
-            intervalTextElement.textContent = exercises[0].text;
-            document.body.style.backgroundColor = "#ffff00";
+            currentIteration = 1;
+            isRunning = false;
+            startBtn.textContent = "Start!";
+            intervalTextElement.textContent = "Get ready!";
+            document.body.style.backgroundColor = "#f5f5f5";
             updateTimerDisplay();
             updateElapsedTimeDisplay();
             updateRemainingTimeDisplay();
-            updateIntervalCounter();
-            startTimer();
+            currentIntervalElement.textContent = "Interval: 0/8";
+            enableControls();
         });
 
         updateTimerDisplay();
         updateElapsedTimeDisplay();
         updateRemainingTimeDisplay();
-        updateIntervalCounter();
-        intervalTextElement.textContent = exercises[0].text;
-        document.body.style.backgroundColor = "#ffff00";
+        currentIntervalElement.textContent = "Interval: 0/8";
     </script>
 </body>
 </html>

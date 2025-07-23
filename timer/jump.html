@@ -101,7 +101,7 @@
 
     <div class="bottom-controls">
         <div class="interval-counter" id="intervalCounter">
-            Интервал 1 из 1
+            Интервал 1 из 3
         </div>
         <div class="button-container">
             <button class="play-button" id="playButton">Старт</button>
@@ -111,7 +111,7 @@
 
     <script>
         let intervalLength = 30;
-        let numberOfIntervals = 1;
+        let numberOfIntervals = 3;
         let currentInterval = 0;
         let timeLeft = intervalLength;
         let isRunning = false;
@@ -124,9 +124,9 @@
         const finishSound = new Audio('finish.mp3');
         const countdownSound = new Audio('countdown.mp3');
 
-        // Create interval options (30 seconds to 3 minutes)
+        // Create interval options (30 seconds to 6 minutes)
         const intervalSelect = document.getElementById('intervalLength');
-        for (let i = 30; i <= 180; i += 15) {
+        for (let i = 30; i <= 360; i += 15) {
             const option = document.createElement('option');
             option.value = i;
             option.textContent = i >= 60 
@@ -135,9 +135,9 @@
             intervalSelect.appendChild(option);
         }
 
-        // Create number of intervals options (1-20)
+        // Create number of intervals options (3-20)
         const intervalCountSelect = document.getElementById('numberOfIntervals');
-        for (let i = 1; i <= 20; i++) {
+        for (let i = 3; i <= 20; i++) {
             const option = document.createElement('option');
             option.value = i;
             option.textContent = `${i} ${getIntervalWord(i)}`;

@@ -103,7 +103,7 @@
 
     <div class="bottom-controls">
         <div class="interval-counter" id="intervalCounter">
-            Интервал 1 из 3
+            Интервал 1 из 3 (работа)
         </div>
         <div class="button-container">
             <button class="play-button" id="playButton">Старт</button>
@@ -115,7 +115,7 @@
         let workTime = 30;
         let restTime = 30;
         let numberOfIterations = 3;
-        let currentIteration = 0;
+        let currentIteration = 1;
         let isWorkPhase = true;
         let timeLeft = workTime;
         let isRunning = false;
@@ -182,10 +182,9 @@
                 document.getElementById('intervalCounter').textContent = "Приготовьтесь!";
             } else {
                 document.getElementById('timer').textContent = formatTime(timeLeft);
-                const totalWorkPhases = numberOfIterations; // Number of work phases equals total iterations
                 document.getElementById('intervalCounter').textContent = 
                     isDone ? "Тренировка завершена!" 
-                    : `Интервал ${currentIteration + 1} из ${totalWorkPhases} (${isWorkPhase ? "работа" : "отдых"})`;
+                    : `Интервал ${currentIteration} из ${numberOfIterations} (${isWorkPhase ? "работа" : "отдых"})`;
             }
         }
 
@@ -210,27 +209,29 @@
             if (timer) clearInterval(timer);
             timer = setInterval(() => {
                 timeLeft--;
+                updateDisplay();
                 if (timeLeft < 0) {
-                    if (currentIteration < numberOfIterations - 1 || (currentIteration === numberOfIterations - 1 && isWorkPhase)) {
-                        intervalSound.play().catch(e => console.log('Sound play failed:', e));
-                        if (isWorkPhase && currentIteration < numberOfIterations - 1) {
+                    intervalSound.play().catch(e => console.log('Sound play failed:', e));
+                    if (isWorkPhase) {
+                        // Switch to rest phase, keep same iteration
+                        isWorkPhase = false;
+                        timeLeft = restTime;
+                    } else {
+                        // End of rest phase, check if more iterations
+                        if (currentIteration < numberOfIterations) {
                             currentIteration++;
-                            isWorkPhase = false;
-                            timeLeft = restTime;
-                        } else if (!isWorkPhase) {
                             isWorkPhase = true;
                             timeLeft = workTime;
+                        } else {
+                            // Finish after last rest
+                            finishSound.play().catch(e => console.log('Sound play failed:', e));
+                            isRunning = false;
+                            isDone = true;
+                            document.getElementById('playButton').textContent = 'Старт';
+                            clearInterval(timer);
                         }
-                        isDone = false;
-                    } else if (currentIteration === numberOfIterations - 1 && !isWorkPhase) {
-                        finishSound.play().catch(e => console.log('Sound play failed:', e));
-                        isRunning = false;
-                        isDone = true;
-                        document.getElementById('playButton').textContent = 'Старт';
-                        clearInterval(timer);
                     }
                 }
-                updateDisplay();
             }, 1000);
         }
 
@@ -256,7 +257,7 @@
             isCountingDown = false;
             clearInterval(timer);
             timeLeft = workTime;
-            currentIteration = 0;
+            currentIteration = 1;
             isWorkPhase = true;
             isDone = false;
             document.getElementById('playButton').textContent = 'Старт';

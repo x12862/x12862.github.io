@@ -88,11 +88,13 @@
 </head>
 <body>
     <div class="top-controls">
-        <select id="intervalLength">
+        <select id="workTime">
             <!-- Will be populated by JavaScript -->
         </select>
-        
-        <select id="numberOfIntervals">
+        <select id="restTime">
+            <!-- Will be populated by JavaScript -->
+        </select>
+        <select id="numberOfIterations">
             <!-- Will be populated by JavaScript -->
         </select>
     </div>
@@ -101,7 +103,7 @@
 
     <div class="bottom-controls">
         <div class="interval-counter" id="intervalCounter">
-            Интервал 1 из 1
+            Интервал 1 из 3
         </div>
         <div class="button-container">
             <button class="play-button" id="playButton">Старт</button>
@@ -110,10 +112,12 @@
     </div>
 
     <script>
-        let intervalLength = 30;
-        let numberOfIntervals = 1;
-        let currentInterval = 0;
-        let timeLeft = intervalLength;
+        let workTime = 30;
+        let restTime = 30;
+        let numberOfIterations = 3;
+        let currentIteration = 0;
+        let isWorkPhase = true;
+        let timeLeft = workTime;
         let isRunning = false;
         let timer;
         let isDone = false;
@@ -124,33 +128,44 @@
         const finishSound = new Audio('finish.mp3');
         const countdownSound = new Audio('countdown.mp3');
 
-        // Create interval options (30 seconds to 3 minutes)
-        const intervalSelect = document.getElementById('intervalLength');
-        for (let i = 30; i <= 180; i += 15) {
+        // Create work time options (30 seconds to 6 minutes)
+        const workTimeSelect = document.getElementById('workTime');
+        for (let i = 30; i <= 360; i += 15) {
             const option = document.createElement('option');
             option.value = i;
             option.textContent = i >= 60 
                 ? `${Math.floor(i/60)}м${i%60 ? ` ${i%60}с` : ''}`
                 : `${i}с`;
-            intervalSelect.appendChild(option);
+            workTimeSelect.appendChild(option);
         }
 
-        // Create number of intervals options (1-20)
-        const intervalCountSelect = document.getElementById('numberOfIntervals');
-        for (let i = 1; i <= 20; i++) {
+        // Create rest time options (30 seconds to 6 minutes)
+        const restTimeSelect = document.getElementById('restTime');
+        for (let i = 30; i <= 360; i += 15) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = `${i} ${getIntervalWord(i)}`;
-            intervalCountSelect.appendChild(option);
+            option.textContent = i >= 60 
+                ? `${Math.floor(i/60)}м${i%60 ? ` ${i%60}с` : ''}`
+                : `${i}с`;
+            restTimeSelect.appendChild(option);
         }
 
-        function getIntervalWord(number) {
+        // Create number of iterations options (3-20)
+        const iterationSelect = document.getElementById('numberOfIterations');
+        for (let i = 3; i <= 20; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} ${getIterationWord(i)}`;
+            iterationSelect.appendChild(option);
+        }
+
+        function getIterationWord(number) {
             if (number % 10 === 1 && number % 100 !== 11) {
-                return "интервал";
+                return "итерация";
             } else if ([2, 3, 4].includes(number % 10) && ![12, 13, 14].includes(number % 100)) {
-                return "интервала";
+                return "итерации";
             } else {
-                return "интервалов";
+                return "итераций";
             }
         }
 
@@ -167,8 +182,10 @@
                 document.getElementById('intervalCounter').textContent = "Приготовьтесь!";
             } else {
                 document.getElementById('timer').textContent = formatTime(timeLeft);
+                const totalWorkPhases = numberOfIterations; // Number of work phases equals total iterations
                 document.getElementById('intervalCounter').textContent = 
-                    isDone ? "Тренировка завершена!" : `Интервал ${currentInterval + 1} из ${numberOfIntervals}`;
+                    isDone ? "Тренировка завершена!" 
+                    : `Интервал ${currentIteration + 1} из ${totalWorkPhases} (${isWorkPhase ? "работа" : "отдых"})`;
             }
         }
 
@@ -194,12 +211,18 @@
             timer = setInterval(() => {
                 timeLeft--;
                 if (timeLeft < 0) {
-                    if (currentInterval < numberOfIntervals - 1) {
+                    if (currentIteration < numberOfIterations - 1 || (currentIteration === numberOfIterations - 1 && isWorkPhase)) {
                         intervalSound.play().catch(e => console.log('Sound play failed:', e));
-                        currentInterval++;
-                        timeLeft = intervalLength;
+                        if (isWorkPhase && currentIteration < numberOfIterations - 1) {
+                            currentIteration++;
+                            isWorkPhase = false;
+                            timeLeft = restTime;
+                        } else if (!isWorkPhase) {
+                            isWorkPhase = true;
+                            timeLeft = workTime;
+                        }
                         isDone = false;
-                    } else {
+                    } else if (currentIteration === numberOfIterations - 1 && !isWorkPhase) {
                         finishSound.play().catch(e => console.log('Sound play failed:', e));
                         isRunning = false;
                         isDone = true;
@@ -232,8 +255,9 @@
             isRunning = false;
             isCountingDown = false;
             clearInterval(timer);
-            timeLeft = intervalLength;
-            currentInterval = 0;
+            timeLeft = workTime;
+            currentIteration = 0;
+            isWorkPhase = true;
             isDone = false;
             document.getElementById('playButton').textContent = 'Старт';
             updateDisplay();
@@ -241,15 +265,22 @@
 
         document.getElementById('resetButton').addEventListener('click', handleReset);
 
-        intervalSelect.addEventListener('change', (e) => {
-            intervalLength = parseInt(e.target.value);
-            timeLeft = intervalLength;
+        workTimeSelect.addEventListener('change', (e) => {
+            workTime = parseInt(e.target.value);
+            if (isWorkPhase) timeLeft = workTime;
             isDone = false;
             updateDisplay();
         });
 
-        intervalCountSelect.addEventListener('change', (e) => {
-            numberOfIntervals = parseInt(e.target.value);
+        restTimeSelect.addEventListener('change', (e) => {
+            restTime = parseInt(e.target.value);
+            if (!isWorkPhase) timeLeft = restTime;
+            isDone = false;
+            updateDisplay();
+        });
+
+        iterationSelect.addEventListener('change', (e) => {
+            numberOfIterations = parseInt(e.target.value);
             isDone = false;
             updateDisplay();
         });

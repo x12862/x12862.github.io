@@ -56,9 +56,13 @@
             background: hsl(0, 85%, 50%);
             border: 1px solid #ab1a1a;
         }
-        #cube2 div {
+        #cube2 div, #cube3 div {
             background: white;
             border: 1px solid #333;
+        }
+        #cube4 div {
+            background: hsl(240, 100%, 50%);
+            border: 1px solid #00008b;
         }
         .dot {
             display: block;
@@ -67,10 +71,10 @@
             height: 10px;
             border-radius: 5px;
         }
-        #cube1 .dot {
+        #cube1 .dot, #cube4 .dot {
             background: #fff;
         }
-        #cube2 .dot {
+        #cube2 .dot, #cube3 .dot {
             background: black;
         }
         .front .dot1 { top: 30px; left: 30px; }
@@ -94,6 +98,17 @@
         .bottom .dot4 { top: 45px; left: 15px; }
         .bottom .dot5 { top: 45px; left: 30px; }
         .bottom .dot6 { top: 45px; left: 45px; }
+
+        /* Unified Button Styles */
+        .action-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -107,7 +122,7 @@
             </div>
         </div>
     </div>
-    <button id="flipButton">Flip Coin</button>
+    <button id="flipButton" class="action-button">Flip Coin</button>
     <div id="result"></div>
 
     <!-- Added Dice Roller Section -->
@@ -187,8 +202,82 @@
                 </div>
             </div>
         </section>
+        <section class="container">
+            <div id="cube3" class="cube">
+                <div class="front">
+                    <span class="dot dot1"></span>
+                </div>
+                <div class="back">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>
+                </div>
+                <div class="right">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                </div>
+                <div class="left">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                </div>
+                <div class="top">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                    <span class="dot dot5"></span>
+                </div>
+                <div class="bottom">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                    <span class="dot dot5"></span>
+                    <span class="dot dot6"></span>
+                </div>
+            </div>
+        </section>
+        <section class="container">
+            <div id="cube4" class="cube">
+                <div class="front">
+                    <span class="dot dot1"></span>
+                </div>
+                <div class="back">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>
+                </div>
+                <div class="right">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                </div>
+                <div class="left">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                </div>
+                <div class="top">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                    <span class="dot dot5"></span>
+                </div>
+                <div class="bottom">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                    <span class="dot dot5"></span>
+                    <span class="dot dot6"></span>
+                </div>
+            </div>
+        </section>
     </div>
-    <button onclick="rollDie()">Roll Dice</button>
+    <button class="action-button" onclick="rollDie()">Roll Dice</button>
 
     <script>
         const faceRotations = {
@@ -203,13 +292,21 @@
         function rollDie() {
             const cube1 = document.getElementById('cube1');
             const cube2 = document.getElementById('cube2');
+            const cube3 = document.getElementById('cube3');
+            const cube4 = document.getElementById('cube4');
             const roll1 = Math.floor(Math.random() * 6) + 1;
             const roll2 = Math.floor(Math.random() * 6) + 1;
+            const roll3 = Math.floor(Math.random() * 6) + 1;
+            const roll4 = Math.floor(Math.random() * 6) + 1;
             const base1 = faceRotations[roll1];
             const base2 = faceRotations[roll2];
+            const base3 = faceRotations[roll3];
+            const base4 = faceRotations[roll4];
             const spins = 8 * 360;  // Consistent 8 full spins
             cube1.style.transform = `rotateX(${base1.x + spins}deg) rotateY(${base1.y + spins}deg)`;
             cube2.style.transform = `rotateX(${base2.x + spins}deg) rotateY(${base2.y + spins}deg)`;
+            cube3.style.transform = `rotateX(${base3.x + spins}deg) rotateY(${base3.y + spins}deg)`;
+            cube4.style.transform = `rotateX(${base4.x + spins}deg) rotateY(${base4.y + spins}deg)`;
         }
     </script>
     <script src="script.js"></script>

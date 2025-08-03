@@ -5,6 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Flip Simulator</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .dice-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        /* 3D Dice Styles */
+        .cube .front {
+            transform: translateZ(35px);
+        }
+        .cube .back {
+            transform: rotateX(-180deg) translateZ(35px);
+        }
+        .cube .right {
+            transform: rotateY(90deg) translateZ(35px);
+        }
+        .cube .left {
+            transform: rotateY(-90deg) translateZ(35px);
+        }
+        .cube .top {
+            transform: rotateX(90deg) translateZ(35px);
+        }
+        .cube .bottom {
+            transform: rotateX(-90deg) translateZ(35px);
+        }
+        .container {
+            width: 70px;
+            height: 70px;
+            position: relative;
+            perspective: 1000px;
+            perspective-origin: 50% 100%;
+        }
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 4s ease-out;
+        }
+        .cube div {
+            display: block;
+            position: absolute;
+            width: 70px;
+            height: 70px;
+        }
+        #cube1 div {
+            background: hsl(0, 85%, 50%);
+            border: 1px solid #ab1a1a;
+        }
+        #cube2 div {
+            background: white;
+            border: 1px solid #333;
+        }
+        .dot {
+            display: block;
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+        }
+        #cube1 .dot {
+            background: #fff;
+        }
+        #cube2 .dot {
+            background: black;
+        }
+        .front .dot1 { top: 30px; left: 30px; }
+        .back .dot1 { top: 15px; left: 15px; }
+        .back .dot2 { top: 45px; left: 45px; }
+        .right .dot1 { top: 15px; left: 15px; }
+        .right .dot2 { top: 30px; left: 30px; }
+        .right .dot3 { top: 45px; left: 45px; }
+        .left .dot1 { top: 15px; left: 15px; }
+        .left .dot2 { top: 15px; left: 45px; }
+        .left .dot3 { top: 45px; left: 15px; }
+        .left .dot4 { top: 45px; left: 45px; }
+        .top .dot1 { top: 15px; left: 15px; }
+        .top .dot2 { top: 15px; left: 45px; }
+        .top .dot3 { top: 30px; left: 30px; }
+        .top .dot4 { top: 45px; left: 15px; }
+        .top .dot5 { top: 45px; left: 45px; }
+        .bottom .dot1 { top: 15px; left: 15px; }
+        .bottom .dot2 { top: 15px; left: 30px; }
+        .bottom .dot3 { top: 15px; left: 45px; }
+        .bottom .dot4 { top: 45px; left: 15px; }
+        .bottom .dot5 { top: 45px; left: 30px; }
+        .bottom .dot6 { top: 45px; left: 45px; }
+    </style>
 </head>
 <body>
     <div class="coin-container">
@@ -19,6 +109,109 @@
     </div>
     <button id="flipButton">Flip Coin</button>
     <div id="result"></div>
+
+    <!-- Added Dice Roller Section -->
+    <h2>6-Sided Dice Roller</h2>
+    <div class="dice-wrapper">
+        <section class="container">
+            <div id="cube1" class="cube">
+                <div class="front">
+                    <span class="dot dot1"></span>
+                </div>
+                <div class="back">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>
+                </div>
+                <div class="right">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                </div>
+                <div class="left">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                </div>
+                <div class="top">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                    <span class="dot dot5"></span>
+                </div>
+                <div class="bottom">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                    <span class="dot dot5"></span>
+                    <span class="dot dot6"></span>
+                </div>
+            </div>
+        </section>
+        <section class="container">
+            <div id="cube2" class="cube">
+                <div class="front">
+                    <span class="dot dot1"></span>
+                </div>
+                <div class="back">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>
+                </div>
+                <div class="right">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                </div>
+                <div class="left">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                </div>
+                <div class="top">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                    <span class="dot dot5"></span>
+                </div>
+                <div class="bottom">
+                    <span class="dot dot1"></span>
+                    <span class="dot dot2"></span>  
+                    <span class="dot dot3"></span>
+                    <span class="dot dot4"></span>
+                    <span class="dot dot5"></span>
+                    <span class="dot dot6"></span>
+                </div>
+            </div>
+        </section>
+    </div>
+    <button onclick="rollDie()">Roll Dice</button>
+
+    <script>
+        const faceRotations = {
+            1: { x: 0, y: 0 },    // front
+            2: { x: 0, y: 180 },  // back
+            3: { x: 0, y: -90 },  // right
+            4: { x: 0, y: 90 },   // left
+            5: { x: -90, y: 0 },  // top
+            6: { x: 90, y: 0 }    // bottom
+        };
+
+        function rollDie() {
+            const cube1 = document.getElementById('cube1');
+            const cube2 = document.getElementById('cube2');
+            const roll1 = Math.floor(Math.random() * 6) + 1;
+            const roll2 = Math.floor(Math.random() * 6) + 1;
+            const base1 = faceRotations[roll1];
+            const base2 = faceRotations[roll2];
+            const spins = 8 * 360;  // Consistent 8 full spins
+            cube1.style.transform = `rotateX(${base1.x + spins}deg) rotateY(${base1.y + spins}deg)`;
+            cube2.style.transform = `rotateX(${base2.x + spins}deg) rotateY(${base2.y + spins}deg)`;
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -288,6 +288,7 @@
         const modeButtons = document.querySelectorAll('.mode-btn');
 
         let hasRewound = false; // Track if we've already rewound once
+        let rewindCount = 0; // Track number of rewinds for multi-rewind modes
         let isPlaying = false;
 
         // Create beep audio element
@@ -311,18 +312,29 @@
                     playBtn.textContent = '⏸';
                     isPlaying = true;
                     hasRewound = false; // Reset rewind flag
+                    rewindCount = 0; // Reset rewind count
                 } else if (mode === '30-60-90-90') {
-                    // Play audio starting at 1:29, with rewind logic
+                    // Play audio starting at 1:29, with rewind logic (1 rewind)
                     audioPlayer.currentTime = 89; // 1 minute 29 seconds = 89 seconds
                     audioPlayer.play();
                     playBtn.textContent = '⏸';
                     isPlaying = true;
                     hasRewound = false; // Reset rewind flag for this mode
+                    rewindCount = 0; // Reset rewind count
+                } else if (mode === '30-60-90-90-90') {
+                    // Play audio starting at 1:29, with rewind logic (2 rewinds)
+                    audioPlayer.currentTime = 89; // 1 minute 29 seconds = 89 seconds
+                    audioPlayer.play();
+                    playBtn.textContent = '⏸';
+                    isPlaying = true;
+                    hasRewound = false; // Reset rewind flag for this mode
+                    rewindCount = 0; // Reset rewind count
                 } else {
                     // Other buttons still play beep
                     beepAudio.currentTime = 0;
                     beepAudio.play().catch(e => console.log('Beep audio not found:', e));
                     hasRewound = false; // Reset rewind flag
+                    rewindCount = 0; // Reset rewind count
                 }
             });
         });
@@ -364,13 +376,25 @@
             const seconds = Math.floor(audioPlayer.currentTime % 60);
             currentTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             
-            // Check for rewind at 11:40 (700 seconds) for "30, 60, 90, 90" mode
-            if (!hasRewound && audioPlayer.currentTime >= 700) {
-                // Find which button was last pressed to determine if we should rewind
+            // Check for rewind at 11:55 (715 seconds) for rewind modes
+            if (audioPlayer.currentTime >= 715) {
                 const activeMode = document.querySelector('.mode-btn.active');
-                if (activeMode && activeMode.getAttribute('data-mode') === '30-60-90-90') {
-                    audioPlayer.currentTime = 465; // 7:45 = 465 seconds
-                    hasRewound = true;
+                if (activeMode) {
+                    const mode = activeMode.getAttribute('data-mode');
+                    
+                    if (mode === '30-60-90-90' && rewindCount === 0) {
+                        // First rewind for "30, 60, 90, 90" mode
+                        audioPlayer.currentTime = 465; // 7:45 = 465 seconds
+                        rewindCount = 1;
+                        hasRewound = true;
+                    } else if (mode === '30-60-90-90-90' && rewindCount < 2) {
+                        // Up to two rewinds for "30, 60, 90, 90, 90" mode
+                        audioPlayer.currentTime = 465; // 7:45 = 465 seconds
+                        rewindCount++;
+                        if (rewindCount === 2) {
+                            hasRewound = true; // Mark as done after second rewind
+                        }
+                    }
                 }
             }
         });

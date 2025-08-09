@@ -295,8 +295,19 @@
         // Mode button functionality
         modeButtons.forEach(button => {
             button.addEventListener('click', function() {
-                beepAudio.currentTime = 0; // Reset to start
-                beepAudio.play().catch(e => console.log('Beep audio not found:', e));
+                const mode = this.getAttribute('data-mode');
+                
+                if (mode === 'original') {
+                    // Play the main audio file starting at 1:28
+                    audioPlayer.currentTime = 88; // 1 minute 28 seconds = 88 seconds
+                    audioPlayer.play();
+                    playBtn.textContent = '⏸';
+                    isPlaying = true;
+                } else {
+                    // Other buttons still play beep
+                    beepAudio.currentTime = 0;
+                    beepAudio.play().catch(e => console.log('Beep audio not found:', e));
+                }
             });
         });
 

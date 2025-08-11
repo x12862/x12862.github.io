@@ -290,6 +290,28 @@
         let hasRewound = false; // Track if we've already rewound once
         let rewindCount = 0; // Track number of rewinds for multi-rewind modes
         let isPlaying = false;
+        let wakeLock = null; // For screen wake lock
+
+        // Request wake lock to prevent screen from sleeping
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake lock acquired');
+                }
+            } catch (err) {
+                console.log('Wake lock failed:', err);
+            }
+        }
+
+        // Release wake lock
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+                console.log('Wake lock released');
+            }
+        }
 
         // Create beep audio element
         const beepAudio = new Audio('beep.mp3');
@@ -313,6 +335,7 @@
                     isPlaying = true;
                     hasRewound = false; // Reset rewind flag
                     rewindCount = 0; // Reset rewind count
+                    requestWakeLock(); // Keep screen awake
                 } else if (mode === '30-60-90-90') {
                     // Play audio starting at 1:29, with rewind logic (1 rewind)
                     audioPlayer.currentTime = 89; // 1 minute 29 seconds = 89 seconds
@@ -321,6 +344,7 @@
                     isPlaying = true;
                     hasRewound = false; // Reset rewind flag for this mode
                     rewindCount = 0; // Reset rewind count
+                    requestWakeLock(); // Keep screen awake
                 } else if (mode === '30-60-90-90-90') {
                     // Play audio starting at 1:29, with rewind logic (2 rewinds)
                     audioPlayer.currentTime = 89; // 1 minute 29 seconds = 89 seconds
@@ -329,6 +353,7 @@
                     isPlaying = true;
                     hasRewound = false; // Reset rewind flag for this mode
                     rewindCount = 0; // Reset rewind count
+                    requestWakeLock(); // Keep screen awake
                 } else {
                     // Other buttons still play beep
                     beepAudio.currentTime = 0;
@@ -345,10 +370,12 @@
                 audioPlayer.pause();
                 playBtn.textContent = '▶';
                 isPlaying = false;
+                releaseWakeLock();
             } else {
                 audioPlayer.play();
                 playBtn.textContent = '⏸';
                 isPlaying = true;
+                requestWakeLock();
             }
         });
 
@@ -414,6 +441,27 @@
             isPlaying = false;
             progressBar.style.width = '0%';
             currentTime.textContent = '0:00';
+            releaseWakeLock(); // Release wake lock when audio ends
+        });
+
+        // Handle page visibility changes to prevent audio pause
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && isPlaying) {
+                // Try to keep audio playing when page becomes hidden
+                audioPlayer.play().catch(e => console.log('Could not resume audio:', e));
+            }
+        });
+
+        // Prevent audio from pausing due to mobile browser optimizations
+        audioPlayer.addEventListener('pause', function() {
+            if (isPlaying) {
+                // If we expect audio to be playing but it paused, try to resume
+                setTimeout(() => {
+                    if (isPlaying) {
+                        audioPlayer.play().catch(e => console.log('Auto-resume failed:', e));
+                    }
+                }, 100);
+            }
         });
 
         // Handle audio loading errors

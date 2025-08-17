@@ -72,12 +72,10 @@
             <option value="Alternate">Alternate</option>
         </select>
         <select id="pullExerciseSelect">
-            <option value="LH/RH Pulls">LH/RH Pulls</option>
-            <option value="Two-Handed Pulls">Two-Handed Pulls</option>
+            <option value="LH/RH Snatch">LH/RH Snatch</option>
         </select>
         <select id="pushExerciseSelect">
-            <option value="Pushups">Pushups</option>
-            <option value="Knuckle Pushups">Knuckle Pushups</option>
+            <option value="LH/RH Press">LH/RH Press</option>
         </select>
         <button id="startBtn">Start!</button>
         <button id="resetBtn">Reset</button>
@@ -95,21 +93,21 @@
 
     <script>
         let exercises = [
-            { text: "5 LH Pulls", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 RH Pulls", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 LH Pulls", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 RH Pulls", prep: 5, exercise: 10, rest: 75 },
-            { text: "5 Pushups", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 Pushups", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 Pushups", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 Pushups", prep: 5, exercise: 10, rest: 75 }
+            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 75 },
+            { text: "5 LH Press", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 RH Press", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 LH Press", prep: 5, exercise: 10, rest: 15 },
+            { text: "5 RH Press", prep: 5, exercise: 10, rest: 75 }
         ];
 
         let exercises_10_2 = [
-            { text: "10 LH Pulls", prep: 5, exercise: 20, rest: 35 },
-            { text: "10 RH Pulls", prep: 5, exercise: 20, rest: 95 },
-            { text: "10 Pushups", prep: 5, exercise: 20, rest: 35 },
-            { text: "10 Pushups", prep: 5, exercise: 20, rest: 95 }
+            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 35 },
+            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 95 },
+            { text: "10 LH Press", prep: 5, exercise: 20, rest: 35 },
+            { text: "10 RH Press", prep: 5, exercise: 20, rest: 95 }
         ];
 
         const defaultExercises = JSON.parse(JSON.stringify(exercises));
@@ -241,26 +239,24 @@
             const pushCount = isTenTwo ? 2 : 4;
 
             let pullTexts = [];
-            if (pullChoice === "Two-Handed Pulls") {
-                const pullText = `${num} Two-Handed Pulls`;
-                for (let i = 0; i < pullCount; i++) {
-                    pullTexts.push(pullText);
-                }
-            } else {
-                const leftText = `${num} LH Pulls`;
-                const rightText = `${num} RH Pulls`;
-                for (let i = 0; i < pullCount; i++) {
-                    pullTexts.push(i % 2 === 0 ? leftText : rightText);
-                }
+            const leftText = `${num} LH Snatch`;
+            const rightText = `${num} RH Snatch`;
+            for (let i = 0; i < pullCount; i++) {
+                pullTexts.push(i % 2 === 0 ? leftText : rightText);
             }
 
-            const pushText = `${num} ${pushChoice}`;
+            let pushTexts = [];
+            const leftPressText = `${num} LH Press`;
+            const rightPressText = `${num} RH Press`;
+            for (let i = 0; i < pushCount; i++) {
+                pushTexts.push(i % 2 === 0 ? leftPressText : rightPressText);
+            }
 
             for (let i = 0; i < pullCount; i++) {
                 exercises[i].text = pullTexts[i];
             }
             for (let i = 0; i < pushCount; i++) {
-                exercises[pullCount + i].text = pushText;
+                exercises[pullCount + i].text = pushTexts[i];
             }
         }
 

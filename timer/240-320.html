@@ -20,28 +20,34 @@
             overflow: hidden;
         }
         .timer {
-            font-size: 48px;
+            font-size: 56px;
             font-weight: bold;
             margin: 5px 0;
             text-align: center;
         }
         .interval-text {
-            font-size: 16px;
+            font-size: 18px;
             margin: 5px 0;
             text-align: center;
             width: 100%;
-            height: 20px;
+            height: 22px;
         }
         .info {
             display: flex;
             flex-direction: column;
             width: 100%;
-            font-size: 12px;
+            font-size: 14px;
             margin: 5px 0;
             text-align: center;
         }
         .info div {
             margin: 1px 0;
+        }
+        .time-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 2px;
         }
         .controls {
             display: flex;
@@ -56,15 +62,15 @@
             width: 100%;
         }
         .controls select {
-            padding: 8px 4px;
-            font-size: 10px;
+            padding: 10px 6px;
+            font-size: 12px;
             cursor: pointer;
             flex: 1;
             min-width: 0;
         }
         .controls button {
-            padding: 12px 8px;
-            font-size: 14px;
+            padding: 14px 10px;
+            font-size: 16px;
             cursor: pointer;
             flex: 1;
         }
@@ -86,9 +92,11 @@
     <div class="interval-text" id="intervalText">Get ready!</div>
     <div class="timer" id="timer">00:00</div>
     <div class="info">
-        <div id="elapsedTime">Elapsed: 00:00</div>
         <div id="currentInterval">Interval: 0/8</div>
-        <div id="remainingTime">Remaining: 06:00</div>
+        <div class="time-row">
+            <div id="elapsedTime">Elapsed: 00:00</div>
+            <div id="remainingTime">Remain: 06:00</div>
+        </div>
     </div>
     <div class="controls">
         <div class="control-row">
@@ -188,7 +196,7 @@
             const remainingTime = iterations * 6 * 60 - totalTimeElapsed;
             const minutes = Math.floor(remainingTime / 60);
             const seconds = remainingTime % 60;
-            remainingTimeElement.textContent = `Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            remainingTimeElement.textContent = `Remain: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
         function updateIntervalCounter() {

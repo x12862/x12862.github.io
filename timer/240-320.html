@@ -101,6 +101,7 @@
     <div class="controls">
         <div class="control-row">
             <select id="iterationsSelect">
+                <option value="2">2x</option>
                 <option value="3">3x</option>
                 <option value="4">4x</option>
                 <option value="5">5x</option>
@@ -290,8 +291,8 @@
             }
 
             let pushTexts = [];
-            const leftPressText = `${num} LH Press`;
-            const rightPressText = `${num} RH Press`;
+            const leftPressText = `${num} LH Viking Press`;
+            const rightPressText = `${num} RH Viking Press`;
             for (let i = 0; i < pushCount; i++) {
                 pushTexts.push(i % 2 === 0 ? leftPressText : rightPressText);
             }

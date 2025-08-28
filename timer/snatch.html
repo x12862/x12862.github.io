@@ -58,15 +58,14 @@
     <div class="info">
         <div id="elapsedTime">Elapsed: 00:00</div>
         <div id="currentInterval">Interval: 0/8</div>
-        <div id="remainingTime">Remaining: 14:00</div>
+        <div id="remainingTime">Remaining: 08:00</div>
     </div>
     <div class="controls">
         <select id="iterationsSelect">
-            <option value="2">2 Iterations</option>
-            <option value="3">3 Iterations</option>
-            <option value="4">4 Iterations</option>
-            <option value="5">5 Iterations</option>
-            <option value="6">6 Iterations</option>
+            <option value="2">2 Series (8 min)</option>
+            <option value="3">3 Series (12 min)</option>
+            <option value="4">4 Series (16 min)</option>
+            <option value="5">5 Series (20 min)</option>
         </select>
         <select id="seriesSelect">
             <option value="5_4">5/4 Series</option>
@@ -88,24 +87,24 @@
     </audio>
 
     <script>
-        // 5/4 Series: 5 snatches - 7 minute iterations with extra rest between LH and RH
+        // 5/4 Series: Exact timing as specified - 8 minutes total per iteration
         let exercises_5_4 = [
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 135 }, // Extra 60s rest = 75+60=135s total
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 135 } // Extra 60s rest = 75+60=135s total
+            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 0-30s
+            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 30-60s
+            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 60-90s
+            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 135 },   // 90-240s (15s + 120s extra)
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 240-270s
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 270-300s
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 300-330s
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 135 }    // 330-480s (15s + 120s extra)
         ];
 
-        // 10/2 Series: 10 snatches - 7 minute iterations with extra rest between LH and RH
+        // 10/2 Series: Exact timing as specified - 8 minutes total per iteration
         let exercises_10_2 = [
-            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 35 },
-            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 155 }, // Extra 60s rest = 95+60=155s total
-            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 35 },
-            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 155 } // Extra 60s rest = 95+60=155s total
+            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 35 },   // 0-60s
+            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 155 },  // 60-240s (35s + 120s extra)
+            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 35 },   // 240-300s
+            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 155 }   // 300-480s (35s + 120s extra)
         ];
 
         const default_5_4 = JSON.parse(JSON.stringify(exercises_5_4));
@@ -147,7 +146,7 @@
         }
 
         function updateRemainingTimeDisplay() {
-            const totalWorkoutTime = iterations * 7 * 60; // 7 minutes per iteration for snatches
+            const totalWorkoutTime = iterations * 8 * 60; // 8 minutes per iteration (480 seconds)
             const remainingTime = totalWorkoutTime - totalTimeElapsed;
             const minutes = Math.floor(remainingTime / 60);
             const seconds = remainingTime % 60;
@@ -238,10 +237,25 @@
         }
 
         function randomizeSelections() {
-            const iterationOptions = iterationsSelect.options;
+            const diceRoll = Math.floor(Math.random() * 6) + 1; // Roll 1-6
             const seriesOptions = seriesSelect.options;
-
-            iterationsSelect.selectedIndex = Math.floor(Math.random() * iterationOptions.length);
+            
+            // Dice logic for iterations
+            let iterationValue;
+            if (diceRoll === 1) {
+                iterationValue = "2"; // 2 series (8 minutes) Left and Right
+            } else if (diceRoll === 2 || diceRoll === 3) {
+                iterationValue = "3"; // 3 series (12 minutes) Left, Right, Left
+            } else if (diceRoll === 4 || diceRoll === 5) {
+                iterationValue = "4"; // 4 series (16 minutes) Left, Right, Left, Right
+            } else { // diceRoll === 6
+                iterationValue = "5"; // 5 series (20 minutes) Left, Right, Left, Right, Left
+            }
+            
+            // Set iterations based on dice roll
+            iterationsSelect.value = iterationValue;
+            
+            // Random series type (5/4, 10/2, or Alternate)
             seriesSelect.selectedIndex = Math.floor(Math.random() * seriesOptions.length);
         }
 
@@ -325,7 +339,7 @@
         });
 
         // Initialize display
-        iterationsSelect.value = "4";
+        iterationsSelect.value = "2";
         updateTimerDisplay();
         updateElapsedTimeDisplay();
         updateRemainingTimeDisplay();

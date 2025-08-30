@@ -57,7 +57,7 @@
     <div class="timer" id="timer">00:00</div>
     <div class="info">
         <div id="elapsedTime">Elapsed: 00:00</div>
-        <div id="currentInterval">Interval: 0/8</div>
+        <div id="currentInterval">Interval: 0/4</div>
         <div id="remainingTime">Remaining: 08:00</div>
     </div>
     <div class="controls">
@@ -87,38 +87,49 @@
     </audio>
 
     <script>
-        // 5/4 Series: Exact timing as specified - 8 minutes total per iteration
-        let exercises_5_4 = [
+        // 5/4 Series - Left Hand only: 4 minutes total
+        let exercise_lh_5_4 = [
             { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 0-30s
             { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 30-60s
             { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 60-90s
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 135 },   // 90-240s (15s + 120s extra)
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 240-270s
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 270-300s
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 300-330s
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 135 }    // 330-480s (15s + 120s extra)
+            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 135 }    // 90-240s (15s + 120s extra)
         ];
 
-        // 10/2 Series: Exact timing as specified - 8 minutes total per iteration
-        let exercises_10_2 = [
+        // 5/4 Series - Right Hand only: 4 minutes total
+        let exercise_rh_5_4 = [
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 0-30s
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 30-60s
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 60-90s
+            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 135 }    // 90-240s (15s + 120s extra)
+        ];
+
+        // 10/2 Series - Left Hand only: 4 minutes total
+        let exercise_lh_10_2 = [
             { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 35 },   // 0-60s
-            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 155 },  // 60-240s (35s + 120s extra)
-            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 35 },   // 240-300s
-            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 155 }   // 300-480s (35s + 120s extra)
+            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 155 }   // 60-240s (35s + 120s extra)
         ];
 
-        const default_5_4 = JSON.parse(JSON.stringify(exercises_5_4));
-        const default_10_2 = JSON.parse(JSON.stringify(exercises_10_2));
+        // 10/2 Series - Right Hand only: 4 minutes total
+        let exercise_rh_10_2 = [
+            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 35 },   // 0-60s
+            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 155 }   // 60-240s (35s + 120s extra)
+        ];
 
-        let exercises = exercises_5_4;
+        const default_lh_5_4 = JSON.parse(JSON.stringify(exercise_lh_5_4));
+        const default_rh_5_4 = JSON.parse(JSON.stringify(exercise_rh_5_4));
+        const default_lh_10_2 = JSON.parse(JSON.stringify(exercise_lh_10_2));
+        const default_rh_10_2 = JSON.parse(JSON.stringify(exercise_rh_10_2));
+
+        let exercises = exercise_lh_5_4;
         let currentInterval = 0;
         let phase = 0; // 0 = prep, 1 = exercise, 2 = rest, 3 = finished
         let timeRemaining = 0;
         let totalTimeElapsed = 0;
         let timerInterval = null;
-        let iterations = 4;
+        let iterations = 2;
         let currentIteration = 1;
         let isRunning = false;
+        let workoutPlan = []; // Array to hold the planned series
         
         const timerElement = document.getElementById('timer');
         const elapsedTimeElement = document.getElementById('elapsedTime');
@@ -133,6 +144,46 @@
         const beepSound = document.getElementById('beepSound');
         const beepSound2 = document.getElementById('beepSound2');
 
+        function createWorkoutPlan() {
+            workoutPlan = [];
+            const seriesChoice = seriesSelect.value;
+            
+            for (let i = 1; i <= iterations; i++) {
+                if (seriesChoice === '5_4') {
+                    // Alternate LH and RH, starting with LH
+                    if (i % 2 === 1) {
+                        workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
+                    } else {
+                        workoutPlan.push(JSON.parse(JSON.stringify(default_rh_5_4)));
+                    }
+                } else if (seriesChoice === '10_2') {
+                    // Alternate LH and RH, starting with LH
+                    if (i % 2 === 1) {
+                        workoutPlan.push(JSON.parse(JSON.stringify(default_lh_10_2)));
+                    } else {
+                        workoutPlan.push(JSON.parse(JSON.stringify(default_rh_10_2)));
+                    }
+                } else if (seriesChoice === 'Alternate') {
+                    // Alternate between 5/4 and 10/2 series types
+                    if (i % 2 === 1) {
+                        // Odd iterations: alternate LH/RH with 5/4
+                        if (Math.floor((i-1)/2) % 2 === 0) {
+                            workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
+                        } else {
+                            workoutPlan.push(JSON.parse(JSON.stringify(default_rh_5_4)));
+                        }
+                    } else {
+                        // Even iterations: alternate LH/RH with 10/2
+                        if (Math.floor((i-1)/2) % 2 === 0) {
+                            workoutPlan.push(JSON.parse(JSON.stringify(default_lh_10_2)));
+                        } else {
+                            workoutPlan.push(JSON.parse(JSON.stringify(default_rh_10_2)));
+                        }
+                    }
+                }
+            }
+        }
+
         function updateTimerDisplay() {
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
@@ -146,7 +197,7 @@
         }
 
         function updateRemainingTimeDisplay() {
-            const totalWorkoutTime = iterations * 8 * 60; // 8 minutes per iteration (480 seconds)
+            const totalWorkoutTime = iterations * 4 * 60; // 4 minutes per series (240 seconds)
             const remainingTime = totalWorkoutTime - totalTimeElapsed;
             const minutes = Math.floor(remainingTime / 60);
             const seconds = remainingTime % 60;
@@ -169,6 +220,27 @@
             }
         }
 
+        /*
+        function playBeep() {
+            // Create a simple beep sound using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+        */
+
         function startNextPhase() {
             if (phase === 3) return;
 
@@ -188,15 +260,15 @@
                 // Moving from rest to next interval
                 currentInterval++;
                 if (currentInterval < exercises.length) {
-                    // Next interval in current iteration
+                    // Next interval in current series
                     intervalTextElement.textContent = exercises[currentInterval].text;
                     timeRemaining = exercises[currentInterval].prep;
                     phase = 0;
                 } else if (currentIteration < iterations) {
-                    // Next iteration
+                    // Next series
                     currentIteration++;
                     currentInterval = 0;
-                    updateExercises();
+                    exercises = workoutPlan[currentIteration - 1];
                     intervalTextElement.textContent = exercises[currentInterval].text;
                     timeRemaining = exercises[currentInterval].prep;
                     phase = 0;
@@ -216,24 +288,6 @@
             changeBackgroundColor();
             updateIntervalCounter();
             updateTimerDisplay();
-        }
-
-        function updateExercises() {
-            const seriesChoice = seriesSelect.value;
-            
-            if (seriesChoice === '10_2') {
-                exercises = JSON.parse(JSON.stringify(default_10_2));
-            } else if (seriesChoice === '5_4') {
-                exercises = JSON.parse(JSON.stringify(default_5_4));
-            } else if (seriesChoice === 'Alternate') {
-                if (currentIteration % 2 === 1) {
-                    // Odd iterations: 5/4
-                    exercises = JSON.parse(JSON.stringify(default_5_4));
-                } else {
-                    // Even iterations: 10/2
-                    exercises = JSON.parse(JSON.stringify(default_10_2));
-                }
-            }
         }
 
         function randomizeSelections() {
@@ -295,7 +349,8 @@
                 currentInterval = 0;
                 phase = 0;
                 totalTimeElapsed = 0;
-                updateExercises();
+                createWorkoutPlan();
+                exercises = workoutPlan[0];
                 timeRemaining = exercises[0].prep;
                 intervalTextElement.textContent = exercises[0].text;
                 changeBackgroundColor();
@@ -334,7 +389,7 @@
             updateTimerDisplay();
             updateElapsedTimeDisplay();
             updateRemainingTimeDisplay();
-            currentIntervalElement.textContent = `Interval: 0/${exercises.length}`;
+            currentIntervalElement.textContent = `Interval: 0/${exercise_lh_5_4.length}`;
             enableControls();
         });
 
@@ -343,7 +398,7 @@
         updateTimerDisplay();
         updateElapsedTimeDisplay();
         updateRemainingTimeDisplay();
-        currentIntervalElement.textContent = `Interval: 0/${exercises.length}`;
+        currentIntervalElement.textContent = `Interval: 0/${exercise_lh_5_4.length}`;
     </script>
 </body>
 </html>

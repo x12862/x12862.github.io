@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Exercise Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #764ba2;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer-display {
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.3);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .timer-display:hover {
+            transform: translateY(-5px);
+        }
+
+        .current-exercise {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .phase {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .time {
+            font-size: 4em;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-info {
+            margin-top: 15px;
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            flex: 1;
+            min-width: 100px;
+            padding: 15px 25px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .pause-btn {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+
+        .pause-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+
+        .settings {
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(118, 75, 162, 0.05);
+            border-radius: 15px;
+            border: 2px solid rgba(118, 75, 162, 0.1);
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #764ba2;
+            font-size: 1.1em;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1em;
+            border: 2px solid rgba(118, 75, 162, 0.2);
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        select:hover {
+            border-color: rgba(118, 75, 162, 0.4);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+
+        .randomize-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            margin-top: 20px;
+        }
+
+        .randomize-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
+        }
+
+        .dice-animation {
+            display: inline-block;
+            animation: roll 0.5s ease-in-out;
+        }
+
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .time {
+                font-size: 3em;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤚 Hand Exercise Timer 🤚</h1>
+        
+        <div class="settings">
+            <div class="setting-group">
+                <label for="exerciseType">Exercise Type:</label>
+                <select id="exerciseType">
+                    <option value="5/4">5/4 Series (5 reps, 4 sets)</option>
+                    <option value="alternate">Alternate (5/4 → 10/2)</option>
+                    <option value="10/2">10/2 Series (10 reps, 2 sets)</option>
+                </select>
+            </div>
+            
+            <div class="setting-group">
+                <label for="numSeries">Number of Series:</label>
+                <select id="numSeries">
+                    <option value="2" selected>2 Series (8 minutes)</option>
+                    <option value="3">3 Series (12 minutes)</option>
+                    <option value="4">4 Series (16 minutes)</option>
+                    <option value="5">5 Series (20 minutes)</option>
+                </select>
+            </div>
+            
+            <button class="randomize-btn" onclick="randomizeSettings()">
+                <span id="diceIcon">🎲</span> Randomize Settings
+            </button>
+        </div>
+        
+        <div class="timer-display">
+            <div class="current-exercise" id="currentExercise">Ready to Start</div>
+            <div class="phase" id="phase">Select settings and press Start</div>
+            <div class="time" id="timer">00:00</div>
+            <div class="progress-info" id="progressInfo"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="start-btn" id="startBtn" onclick="startTimer()">Start</button>
+            <button class="pause-btn" id="pauseBtn" onclick="pauseTimer()" style="display: none;">Pause</button>
+            <button class="reset-btn" onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        let timer = null;
+        let isPaused = false;
+        let currentTime = 0;
+        let totalTime = 0;
+        let currentSeriesIndex = 0;
+        let currentSetIndex = 0;
+        let currentRepIndex = 0;
+        let isResting = false;
+        let seriesQueue = [];
+        let currentPhase = null;
+
+        const SERIES_DURATION = 240; // 4 minutes in seconds
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function buildSeriesQueue() {
+            const exerciseType = document.getElementById('exerciseType').value;
+            const numSeries = parseInt(document.getElementById('numSeries').value);
+            seriesQueue = [];
+
+            if (exerciseType === 'alternate') {
+                // Alternate pattern: 5/4 L, 5/4 R, 10/2 L, 10/2 R, 5/4 L, 5/4 R...
+                const pattern = [
+                    { hand: 'Left Hand', type: '5/4' },
+                    { hand: 'Right Hand', type: '5/4' },
+                    { hand: 'Left Hand', type: '10/2' },
+                    { hand: 'Right Hand', type: '10/2' }
+                ];
+                
+                for (let i = 0; i < numSeries; i++) {
+                    seriesQueue.push(pattern[i % pattern.length]);
+                }
+            } else {
+                // Regular alternating pattern
+                for (let i = 0; i < numSeries; i++) {
+                    seriesQueue.push({
+                        hand: i % 2 === 0 ? 'Left Hand' : 'Right Hand',
+                        type: exerciseType
+                    });
+                }
+            }
+        }
+
+        function getExerciseParams(type) {
+            if (type === '5/4') {
+                return { reps: 5, sets: 4, repTime: 10, restTime: 20 };
+            } else if (type === '10/2') {
+                return { reps: 10, sets: 2, repTime: 20, restTime: 40 };
+            }
+        }
+
+        function updateDisplay() {
+            if (seriesQueue.length === 0) return;
+
+            const currentSeries = seriesQueue[currentSeriesIndex];
+            const params = getExerciseParams(currentSeries.type);
+            
+            // Calculate time within current series
+            const timeInSeries = currentTime % SERIES_DURATION;
+            const remainingInSeries = SERIES_DURATION - timeInSeries;
+            
+            document.getElementById('currentExercise').textContent = currentSeries.hand;
+            document.getElementById('timer').textContent = formatTime(remainingInSeries);
+            
+            // Calculate current phase within the series
+            let phaseText = '';
+            let progressText = `Series ${currentSeriesIndex + 1}/${seriesQueue.length} • ${currentSeries.type}`;
+            
+            if (timeInSeries < params.sets * (params.repTime + params.restTime)) {
+                // Active sets phase
+                const timeInSets = timeInSeries % (params.repTime + params.restTime);
+                const currentSet = Math.floor(timeInSeries / (params.repTime + params.restTime)) + 1;
+                
+                if (currentSet <= params.sets) {
+                    if (timeInSets < params.repTime) {
+                        const currentRep = Math.floor(timeInSets / (params.repTime / params.reps)) + 1;
+                        phaseText = `Rep ${currentRep}/${params.reps} • Set ${currentSet}/${params.sets}`;
+                        document.getElementById('timer').style.color = '#fff';
+                    } else {
+                        phaseText = `Rest • Set ${currentSet}/${params.sets}`;
+                        document.getElementById('timer').style.color = '#ffeb3b';
+                    }
+                }
+            } else {
+                // Final rest phase
+                phaseText = 'Final Rest';
+                document.getElementById('timer').style.color = '#4CAF50';
+            }
+            
+            document.getElementById('phase').textContent = phaseText;
+            document.getElementById('progressInfo').textContent = progressText;
+        }
+
+        function tick() {
+            if (!isPaused) {
+                currentTime++;
+                
+                // Check if current series is complete
+                if (currentTime > 0 && currentTime % SERIES_DURATION === 0) {
+                    currentSeriesIndex++;
+                    if (currentSeriesIndex >= seriesQueue.length) {
+                        // Workout complete
+                        completeWorkout();
+                        return;
+                    }
+                }
+                
+                updateDisplay();
+            }
+        }
+
+        function startTimer() {
+            if (timer) return;
+            
+            buildSeriesQueue();
+            currentTime = 0;
+            currentSeriesIndex = 0;
+            isPaused = false;
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('pauseBtn').style.display = 'block';
+            document.getElementById('exerciseType').disabled = true;
+            document.getElementById('numSeries').disabled = true;
+            
+            updateDisplay();
+            timer = setInterval(tick, 1000);
+        }
+
+        function pauseTimer() {
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+        }
+
+        function resetTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
+            currentTime = 0;
+            currentSeriesIndex = 0;
+            isPaused = false;
+            seriesQueue = [];
+            
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            document.getElementById('pauseBtn').textContent = 'Pause';
+            document.getElementById('exerciseType').disabled = false;
+            document.getElementById('numSeries').disabled = false;
+            
+            document.getElementById('currentExercise').textContent = 'Ready to Start';
+            document.getElementById('phase').textContent = 'Select settings and press Start';
+            document.getElementById('timer').textContent = '00:00';
+            document.getElementById('timer').style.color = '#fff';
+            document.getElementById('progressInfo').textContent = '';
+        }
+
+        function completeWorkout() {
+            resetTimer();
+            document.getElementById('currentExercise').textContent = '🎉 Workout Complete! 🎉';
+            document.getElementById('phase').textContent = 'Great job!';
+            document.getElementById('timer').textContent = '00:00';
+        }
+
+        function randomizeSettings() {
+            // Animate dice
+            const diceIcon = document.getElementById('diceIcon');
+            diceIcon.classList.add('dice-animation');
+            setTimeout(() => diceIcon.classList.remove('dice-animation'), 500);
+            
+            // Randomize number of series (weighted)
+            const seriesRoll = Math.floor(Math.random() * 6) + 1;
+            let numSeries;
+            if (seriesRoll === 1) numSeries = 2;
+            else if (seriesRoll <= 3) numSeries = 3;
+            else if (seriesRoll <= 5) numSeries = 4;
+            else numSeries = 5;
+            
+            // Randomize exercise type (equal probability)
+            const typeRoll = Math.floor(Math.random() * 3);
+            let exerciseType;
+            if (typeRoll === 0) exerciseType = '5/4';
+            else if (typeRoll === 1) exerciseType = 'alternate';
+            else exerciseType = '10/2';
+            
+            // Set the values
+            document.getElementById('numSeries').value = numSeries.toString();
+            document.getElementById('exerciseType').value = exerciseType;
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            resetTimer();
+        });
+    </script>
+</body>
+</html>

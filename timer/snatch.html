@@ -62,10 +62,10 @@
     </div>
     <div class="controls">
         <select id="iterationsSelect">
-            <option value="2">2 Series (8 min)</option>
-            <option value="3">3 Series (12 min)</option>
-            <option value="4">4 Series (16 min)</option>
-            <option value="5">5 Series (20 min)</option>
+            <option value="2">2 Series</option>
+            <option value="3">3 Series</option>
+            <option value="4">4 Series</option>
+            <option value="5">5 Series</option>
         </select>
         <select id="seriesSelect">
             <option value="5_4">5/4 Series</option>
@@ -89,30 +89,30 @@
     <script>
         // 5/4 Series - Left Hand only: 4 minutes total
         let exercise_lh_5_4 = [
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 0-30s
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 30-60s
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 15 },    // 60-90s
-            { text: "5 LH Snatch", prep: 5, exercise: 10, rest: 135 }    // 90-240s (15s + 120s extra)
+            { text: "5 Left Hand", prep: 5, exercise: 10, rest: 15 },    // 0-30s
+            { text: "5 Left Hand", prep: 5, exercise: 10, rest: 15 },    // 30-60s
+            { text: "5 Left Hand", prep: 5, exercise: 10, rest: 15 },    // 60-90s
+            { text: "5 Left Hand", prep: 5, exercise: 10, rest: 135 }    // 90-240s (15s + 120s extra)
         ];
 
         // 5/4 Series - Right Hand only: 4 minutes total
         let exercise_rh_5_4 = [
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 0-30s
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 30-60s
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 15 },    // 60-90s
-            { text: "5 RH Snatch", prep: 5, exercise: 10, rest: 135 }    // 90-240s (15s + 120s extra)
+            { text: "5 Right Hand", prep: 5, exercise: 10, rest: 15 },    // 0-30s
+            { text: "5 Right Hand", prep: 5, exercise: 10, rest: 15 },    // 30-60s
+            { text: "5 Right Hand", prep: 5, exercise: 10, rest: 15 },    // 60-90s
+            { text: "5 Right Hand", prep: 5, exercise: 10, rest: 135 }    // 90-240s (15s + 120s extra)
         ];
 
         // 10/2 Series - Left Hand only: 4 minutes total
         let exercise_lh_10_2 = [
-            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 35 },   // 0-60s
-            { text: "10 LH Snatch", prep: 5, exercise: 20, rest: 155 }   // 60-240s (35s + 120s extra)
+            { text: "10 Left Hand", prep: 5, exercise: 20, rest: 35 },   // 0-60s
+            { text: "10 Left Hand", prep: 5, exercise: 20, rest: 155 }   // 60-240s (35s + 120s extra)
         ];
 
         // 10/2 Series - Right Hand only: 4 minutes total
         let exercise_rh_10_2 = [
-            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 35 },   // 0-60s
-            { text: "10 RH Snatch", prep: 5, exercise: 20, rest: 155 }   // 60-240s (35s + 120s extra)
+            { text: "10 Right Hand", prep: 5, exercise: 20, rest: 35 },   // 0-60s
+            { text: "10 Right Hand", prep: 5, exercise: 20, rest: 155 }   // 60-240s (35s + 120s extra)
         ];
 
         const default_lh_5_4 = JSON.parse(JSON.stringify(exercise_lh_5_4));
@@ -148,38 +148,48 @@
             workoutPlan = [];
             const seriesChoice = seriesSelect.value;
             
-            for (let i = 1; i <= iterations; i++) {
-                if (seriesChoice === '5_4') {
-                    // Alternate LH and RH, starting with LH
+            if (seriesChoice === '5_4') {
+                // 5/4 Series: Alternate LH and RH
+                for (let i = 1; i <= iterations; i++) {
                     if (i % 2 === 1) {
                         workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
                     } else {
                         workoutPlan.push(JSON.parse(JSON.stringify(default_rh_5_4)));
                     }
-                } else if (seriesChoice === '10_2') {
-                    // Alternate LH and RH, starting with LH
+                }
+            } else if (seriesChoice === '10_2') {
+                // 10/2 Series: Alternate LH and RH
+                for (let i = 1; i <= iterations; i++) {
                     if (i % 2 === 1) {
                         workoutPlan.push(JSON.parse(JSON.stringify(default_lh_10_2)));
                     } else {
                         workoutPlan.push(JSON.parse(JSON.stringify(default_rh_10_2)));
                     }
-                } else if (seriesChoice === 'Alternate') {
-                    // Alternate between 5/4 and 10/2 series types
-                    if (i % 2 === 1) {
-                        // Odd iterations: alternate LH/RH with 5/4
-                        if (Math.floor((i-1)/2) % 2 === 0) {
-                            workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
-                        } else {
-                            workoutPlan.push(JSON.parse(JSON.stringify(default_rh_5_4)));
-                        }
-                    } else {
-                        // Even iterations: alternate LH/RH with 10/2
-                        if (Math.floor((i-1)/2) % 2 === 0) {
-                            workoutPlan.push(JSON.parse(JSON.stringify(default_lh_10_2)));
-                        } else {
-                            workoutPlan.push(JSON.parse(JSON.stringify(default_rh_10_2)));
-                        }
-                    }
+                }
+            } else if (seriesChoice === 'Alternate') {
+                // Specific patterns based on number of series
+                if (iterations === 2) {
+                    // 2 Series: exercise_lh_5_4 + exercise_rh_10_2
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_rh_10_2)));
+                } else if (iterations === 3) {
+                    // 3 Series: exercise_lh_5_4 + exercise_rh_10_2 + exercise_lh_5_4
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_rh_10_2)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
+                } else if (iterations === 4) {
+                    // 4 Series: exercise_lh_5_4 + exercise_rh_5_4 + exercise_lh_10_2 + exercise_rh_5_4
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_rh_5_4)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_lh_10_2)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_rh_5_4)));
+                } else if (iterations === 5) {
+                    // 5 Series: exercise_lh_5_4 + exercise_rh_5_4 + exercise_lh_10_2 + exercise_rh_10_2 + exercise_lh_5_4
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_rh_5_4)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_lh_10_2)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_rh_10_2)));
+                    workoutPlan.push(JSON.parse(JSON.stringify(default_lh_5_4)));
                 }
             }
         }
@@ -197,11 +207,21 @@
         }
 
         function updateRemainingTimeDisplay() {
-            const totalWorkoutTime = iterations * 4 * 60; // 4 minutes per series (240 seconds)
-            const remainingTime = totalWorkoutTime - totalTimeElapsed;
-            const minutes = Math.floor(remainingTime / 60);
-            const seconds = remainingTime % 60;
-            remainingTimeElement.textContent = `Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            const selectedIterations = parseInt(iterationsSelect.value, 10);
+            const totalWorkoutTime = selectedIterations * 4 * 60; // 4 minutes per series (240 seconds)
+            
+            if (isRunning) {
+                // During workout, show actual remaining time
+                const remainingTime = totalWorkoutTime - totalTimeElapsed;
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                remainingTimeElement.textContent = `Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                // Before workout starts, show total planned workout time
+                const minutes = Math.floor(totalWorkoutTime / 60);
+                const seconds = totalWorkoutTime % 60;
+                remainingTimeElement.textContent = `Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
         }
 
         function updateIntervalCounter() {
@@ -311,6 +331,9 @@
             
             // Random series type (5/4, 10/2, or Alternate)
             seriesSelect.selectedIndex = Math.floor(Math.random() * seriesOptions.length);
+            
+            // Update remaining time display after randomization
+            updateRemainingTimeDisplay();
         }
 
         function startTimer() {
@@ -341,6 +364,10 @@
         }
 
         randomizeBtn.addEventListener('click', randomizeSelections);
+
+        // Update remaining time when iterations selection changes
+        iterationsSelect.addEventListener('change', updateRemainingTimeDisplay);
+        seriesSelect.addEventListener('change', updateRemainingTimeDisplay);
 
         startBtn.addEventListener('click', () => {
             if (startBtn.textContent === "Start!") {

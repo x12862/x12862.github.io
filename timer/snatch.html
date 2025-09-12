@@ -310,9 +310,20 @@
             updateTimerDisplay();
         }
 
-        function randomizeSelections() {
-            const diceRoll = Math.floor(Math.random() * 6) + 1; // Roll 1-6
-            const seriesOptions = seriesSelect.options;
+		function randomizeSelections() {
+			function secureRollDice() {                    // replacing shitty // Math.random
+				const randomBuffer = new Uint8Array(1);
+				crypto.getRandomValues(randomBuffer);    
+				const value = randomBuffer[0];
+				if (value < 252) {                         // 252 = 42 * 6 (largest multiple of 6 < 256)
+					return (value % 6) + 1;
+				}
+				// Retry if we hit the biased range (252-255)
+				return secureRollDice();
+			}
+    
+			const diceRoll = secureRollDice(); // Roll 1-6
+			const seriesOptions = seriesSelect.options;
             
             // Dice logic for iterations
             let iterationValue;
@@ -330,7 +341,17 @@
             iterationsSelect.value = iterationValue;
             
             // Random series type (5/4, 10/2, or Alternate)
-            seriesSelect.selectedIndex = Math.floor(Math.random() * seriesOptions.length);
+			function secureRollTriad() { // Returns 0, 1, or 2 uniformly
+				const randomBuffer = new Uint8Array(1);
+				crypto.getRandomValues(randomBuffer);
+				const value = randomBuffer[0];
+				if (value < 255) {
+					return value % 3;
+				}
+				return secureRollTriad();
+			}
+					
+            seriesSelect.selectedIndex = secureRollTriad();
             
             // Update remaining time display after randomization
             updateRemainingTimeDisplay();

@@ -254,17 +254,17 @@
                 <div id="loginForm">
                     <h2>Вход</h2>
                     <div class="form-group">
-                        <label>имейл</label>
+                        <label>логин</label>
                         <input type="email" id="loginEmail" placeholder="имейл">
                     </div>
                     <div class="form-group">
                         <label>пароль</label>
-                        <input type="password" id="loginPassword" placeholder="пароль">
+                        <input type="password" id="loginPassword" placeholder="">
                     </div>
                     <button type="button" id="loginBtn">Login</button>
                     <div class="error" id="loginError"></div>
                     <div class="auth-toggle">
-                        Создать аккаунт: <a id="showSignup">мгновенная регистрация</a>
+                        Мгновенно создать новый аккаунт: <a id="showSignup">регистрация</a>
                     </div>
                 </div>
                 
@@ -272,17 +272,17 @@
                     <h2>Регистрация</h2>
                     <div class="form-group">
                         <label>Email (можно липовый):</label>
-                        <input type="email" id="signupEmail" placeholder="Без проверки и восстановления">
+                        <input type="email" id="signupEmail" placeholder="Не проверяю, не восстанавливаю">
                     </div>
                     <div class="form-group">
                         <label>Пароль</label>
-                        <input type="password" id="signupPassword" placeholder="минимум 6 букв">
+                        <input type="password" id="signupPassword" placeholder="мин 6 символов">
                     </div>
                     <button type="button" id="signupBtn">Регистрация</button>
                     <div class="error" id="signupError"></div>
                     <div class="success" id="signupSuccess"></div>
                     <div class="auth-toggle">
-                        Уже есть аккаунт? <a id="showLogin">Вход</a>
+                        Есть аккаунт? <a id="showLogin">Вход</a>
                     </div>
                 </div>
             </div>
@@ -301,12 +301,12 @@
                 
                 <h2>Новая запись</h2>
                 <div class="form-group">
-                    <label>Номер</label>
-                    <input type="number" id="numberInput" placeholder="Enter a number" step="any">
+                    <label>Число</label>
+                    <input type="number" id="numberInput" placeholder="номера" step="any">
                 </div>
                 <div class="form-group">
-                    <label>Записка</label>
-                    <textarea id="noteInput" placeholder="Enter your note"></textarea>
+                    <label>Комментарий</label>
+                    <textarea id="noteInput" placeholder="буквы"></textarea>
                 </div>
                 <button type="button" id="addEntryBtn">Добавить</button>
                 <div class="success" id="addSuccess"></div>
@@ -460,7 +460,7 @@
                 const container = document.getElementById('entriesContainer');
                 
                 if (!data) {
-                    container.innerHTML = '<div class="no-data">No entries yet. Add your first entry above!</div>';
+                    container.innerHTML = '<div class="no-data">Пока тут пусто</div>';
                     document.getElementById('totalSum').textContent = '0';
                     return;
                 }
@@ -475,20 +475,20 @@
                 const total = entries.reduce((sum, entry) => sum + (entry.number || 0), 0);
                 document.getElementById('totalSum').textContent = total.toFixed(2);
 
-                let html = '<table><thead><tr><th>Date</th><th>Number</th><th>Note</th><th>Action</th></tr></thead><tbody>';
+                let html = '<table><thead><tr><th>Дата</th><th>Номер</th><th>Комментарий</th><th>Действие</th></tr></thead><tbody>';
                 
                 entries.forEach(entry => {
-                    const date = new Date(entry.date).toLocaleDateString('en-US', {
+                    const date = new Date(entry.date).toLocaleDateString('en-CA', {
                         year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
+                        month: '2-digit',
+                        day: '2-digit'
                     });
                     html += `
                         <tr>
                             <td>${date}</td>
                             <td>${entry.number}</td>
                             <td>${entry.note}</td>
-                            <td><button class="delete-btn" data-id="${entry.id}">Delete</button></td>
+                            <td><button class="delete-btn" data-id="${entry.id}">Удалить</button></td>
                         </tr>
                     `;
                 });
@@ -506,7 +506,7 @@
         }
 
         async function deleteEntry(entryId) {
-            if (!confirm('Are you sure you want to delete this entry?')) {
+            if (!confirm('Точно удалить?')) {
                 return;
             }
 
@@ -514,7 +514,7 @@
                 const entryRef = ref(database, 'entries/' + currentUser.uid + '/' + entryId);
                 await remove(entryRef);
             } catch (error) {
-                alert('Error deleting entry: ' + error.message);
+                alert('Не получилось удалить: ' + error.message);
             }
         }
     </script>

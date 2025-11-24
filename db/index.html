@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Notes Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .auth-section, .app-section {
+            display: none;
+        }
+        
+        .auth-section.active, .app-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            margin-left: 10px;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .summary h3 {
+            font-size: 36px;
+            margin-top: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .error {
+            color: #dc3545;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .success {
+            color: #28a745;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .auth-toggle {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+        }
+        
+        .auth-toggle a {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Notes & Numbers Tracker</h1>
+            <p>Securely track your numbers and notes</p>
+        </div>
+        
+        <div class="content">
+            <!-- Authentication Section -->
+            <div class="auth-section active" id="authSection">
+                <div id="loginForm">
+                    <h2>Login</h2>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password">
+                    </div>
+                    <button onclick="login()">Login</button>
+                    <div class="error" id="loginError"></div>
+                    <div class="auth-toggle">
+                        Don't have an account? <a onclick="toggleAuth()">Sign up</a>
+                    </div>
+                </div>
+                
+                <div id="signupForm" style="display:none;">
+                    <h2>Sign Up</h2>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signupEmail" placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)">
+                    </div>
+                    <button onclick="signup()">Sign Up</button>
+                    <div class="error" id="signupError"></div>
+                    <div class="success" id="signupSuccess"></div>
+                    <div class="auth-toggle">
+                        Already have an account? <a onclick="toggleAuth()">Login</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- App Section -->
+            <div class="app-section" id="appSection">
+                <div class="user-info">
+                    <span>Logged in as: <strong id="userEmail"></strong></span>
+                    <button class="btn-danger" onclick="logout()">Logout</button>
+                </div>
+                
+                <div class="summary">
+                    <p>Total Sum</p>
+                    <h3 id="totalSum">0</h3>
+                </div>
+                
+                <h2>Add New Entry</h2>
+                <div class="form-group">
+                    <label>Number</label>
+                    <input type="number" id="numberInput" placeholder="Enter a number" step="any">
+                </div>
+                <div class="form-group">
+                    <label>Note</label>
+                    <textarea id="noteInput" placeholder="Enter your note"></textarea>
+                </div>
+                <button onclick="addEntry()">Add Entry</button>
+                <div class="success" id="addSuccess"></div>
+                
+                <h2 style="margin-top: 40px;">Your Entries</h2>
+                <div id="entriesContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase configuration - REPLACE WITH YOUR OWN CONFIG
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, push, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // x12-862 Firebase config
+		import { initializeApp } from "firebase/app";
+		// TODO: Add SDKs for Firebase products that you want to use
+		// https://firebase.google.com/docs/web/setup#available-libraries
+
+		// Your web app's Firebase configuration
+		const firebaseConfig = {
+		  apiKey: "AIzaSyC7asAazIQlmOqih2SzLkQgow_kjRkKm8o",
+		  authDomain: "x12-862.firebaseapp.com",
+		  databaseURL: "https://x12-862-default-rtdb.firebaseio.com",
+		  projectId: "x12-862",
+		  storageBucket: "x12-862.firebasestorage.app",
+		  messagingSenderId: "470845573086",
+		  appId: "1:470845573086:web:78f8ae2c127f65298bbf4f"
+		};
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        window.currentUser = null;
+
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.currentUser = user;
+                showApp();
+                loadEntries();
+            } else {
+                window.currentUser = null;
+                showAuth();
+            }
+        });
+
+        function showAuth() {
+            document.getElementById('authSection').classList.add('active');
+            document.getElementById('appSection').classList.remove('active');
+        }
+
+        function showApp() {
+            document.getElementById('authSection').classList.remove('active');
+            document.getElementById('appSection').classList.add('active');
+            document.getElementById('userEmail').textContent = window.currentUser.email;
+        }
+
+        window.toggleAuth = function() {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+            }
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('signupError').textContent = '';
+            document.getElementById('signupSuccess').textContent = '';
+        };
+
+        window.signup = async function() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const errorDiv = document.getElementById('signupError');
+            const successDiv = document.getElementById('signupSuccess');
+            
+            errorDiv.textContent = '';
+            successDiv.textContent = '';
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                successDiv.textContent = 'Account created successfully!';
+                setTimeout(() => window.toggleAuth(), 1500);
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            }
+        };
+
+        window.login = async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            errorDiv.textContent = '';
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            }
+        };
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        };
+
+        window.addEntry = async function() {
+            const number = parseFloat(document.getElementById('numberInput').value);
+            const note = document.getElementById('noteInput').value;
+            const successDiv = document.getElementById('addSuccess');
+
+            if (isNaN(number) || !note.trim()) {
+                alert('Please enter both a number and a note');
+                return;
+            }
+
+            const entry = {
+                number: number,
+                note: note,
+                date: new Date().toISOString(),
+                userId: window.currentUser.uid
+            };
+
+            try {
+                const entriesRef = ref(database, 'entries/' + window.currentUser.uid);
+                await push(entriesRef, entry);
+                
+                document.getElementById('numberInput').value = '';
+                document.getElementById('noteInput').value = '';
+                successDiv.textContent = 'Entry added successfully!';
+                setTimeout(() => successDiv.textContent = '', 3000);
+            } catch (error) {
+                alert('Error adding entry: ' + error.message);
+            }
+        };
+
+        window.loadEntries = function() {
+            const entriesRef = ref(database, 'entries/' + window.currentUser.uid);
+            
+            onValue(entriesRef, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('entriesContainer');
+                
+                if (!data) {
+                    container.innerHTML = '<div class="no-data">No entries yet. Add your first entry above!</div>';
+                    document.getElementById('totalSum').textContent = '0';
+                    return;
+                }
+
+                const entries = Object.entries(data).map(([id, entry]) => ({
+                    id,
+                    ...entry
+                }));
+
+                entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                const total = entries.reduce((sum, entry) => sum + (entry.number || 0), 0);
+                document.getElementById('totalSum').textContent = total.toFixed(2);
+
+                let html = '<table><thead><tr><th>Date</th><th>Number</th><th>Note</th><th>Action</th></tr></thead><tbody>';
+                
+                entries.forEach(entry => {
+                    const date = new Date(entry.date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    html += `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${entry.number}</td>
+                            <td>${entry.note}</td>
+                            <td><button class="delete-btn" onclick="deleteEntry('${entry.id}')">Delete</button></td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            });
+        };
+
+        window.deleteEntry = async function(entryId) {
+            if (!confirm('Are you sure you want to delete this entry?')) {
+                return;
+            }
+
+            try {
+                const entryRef = ref(database, 'entries/' + window.currentUser.uid + '/' + entryId);
+                await remove(entryRef);
+            } catch (error) {
+                alert('Error deleting entry: ' + error.message);
+            }
+        };
+    </script>
+</body>
+</html>

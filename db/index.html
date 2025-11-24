@@ -393,7 +393,7 @@
 
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
-                successDiv.textContent = 'Account created successfully!';
+                successDiv.textContent = 'Аккаунт создан!';
                 setTimeout(() => toggleAuth(), 1500);
             } catch (error) {
                 errorDiv.textContent = error.message;
@@ -428,7 +428,7 @@
             const successDiv = document.getElementById('addSuccess');
 
             if (isNaN(number) || !note.trim()) {
-                alert('Please enter both a number and a note');
+                alert('номер и запись вместе');
                 return;
             }
 
@@ -448,7 +448,7 @@
                 successDiv.textContent = 'Entry added successfully!';
                 setTimeout(() => successDiv.textContent = '', 3000);
             } catch (error) {
-                alert('Error adding entry: ' + error.message);
+                alert('Не получилось добавить: ' + error.message);
             }
         });
 

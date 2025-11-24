@@ -244,7 +244,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Дневник</h1>
+            <h1>Записи</h1>
             <p>Быстрые наброски на ходу</p>
         </div>
         
@@ -252,37 +252,37 @@
             <!-- Authentication Section -->
             <div class="auth-section active" id="authSection">
                 <div id="loginForm">
-                    <h2>Login</h2>
+                    <h2>Логин:</h2>
                     <div class="form-group">
-                        <label>Email</label>
+                        <label>имейл</label>
                         <input type="email" id="loginEmail" placeholder="Enter your email">
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
+                        <label>пароль</label>
                         <input type="password" id="loginPassword" placeholder="Enter your password">
                     </div>
                     <button type="button" id="loginBtn">Login</button>
                     <div class="error" id="loginError"></div>
                     <div class="auth-toggle">
-                        Don't have an account? <a id="showSignup">Sign up</a>
+                        Создать аккаунт: <a id="showSignup">мгновенная регистрация</a>
                     </div>
                 </div>
                 
                 <div id="signupForm" style="display:none;">
-                    <h2>Sign Up</h2>
+                    <h2>Регистрация</h2>
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="signupEmail" placeholder="Enter your email">
+                        <label>Email (можно липовый):</label>
+                        <input type="email" id="signupEmail" placeholder="Без проверки и восстановления">
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)">
+                        <label>Пароль</label>
+                        <input type="password" id="signupPassword" placeholder="минимум 6 букв">
                     </div>
-                    <button type="button" id="signupBtn">Sign Up</button>
+                    <button type="button" id="signupBtn">Регистрация</button>
                     <div class="error" id="signupError"></div>
                     <div class="success" id="signupSuccess"></div>
                     <div class="auth-toggle">
-                        Already have an account? <a id="showLogin">Login</a>
+                        Уже есть аккаунт? <a id="showLogin">Вход</a>
                     </div>
                 </div>
             </div>
@@ -290,28 +290,28 @@
             <!-- App Section -->
             <div class="app-section" id="appSection">
                 <div class="user-info">
-                    <span>Logged in as: <strong id="userEmail"></strong></span>
-                    <button class="btn-danger" id="logoutBtn">Logout</button>
+                    <span>Вошли как: <strong id="userEmail"></strong></span>
+                    <button class="btn-danger" id="logoutBtn">Выход</button>
                 </div>
                 
                 <div class="summary">
-                    <p>Total Sum</p>
+                    <p>Сумма</p>
                     <h3 id="totalSum">0</h3>
                 </div>
                 
-                <h2>Add New Entry</h2>
+                <h2>Новая запись</h2>
                 <div class="form-group">
-                    <label>Number</label>
+                    <label>Номер</label>
                     <input type="number" id="numberInput" placeholder="Enter a number" step="any">
                 </div>
                 <div class="form-group">
-                    <label>Note</label>
+                    <label>Записка</label>
                     <textarea id="noteInput" placeholder="Enter your note"></textarea>
                 </div>
-                <button type="button" id="addEntryBtn">Add Entry</button>
+                <button type="button" id="addEntryBtn">Добавить</button>
                 <div class="success" id="addSuccess"></div>
                 
-                <h2 style="margin-top: 40px;">Your Entries</h2>
+                <h2 style="margin-top: 40px;">История</h2>
                 <div id="entriesContainer"></div>
             </div>
         </div>

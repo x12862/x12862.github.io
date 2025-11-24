@@ -302,11 +302,11 @@
                 <h2>Новая запись</h2>
                 <div class="form-group">
                     <label>Число</label>
-                    <input type="number" id="numberInput" placeholder="номера" step="any">
+                    <input type="number" id="numberInput" placeholder="0" step="any">
                 </div>
                 <div class="form-group">
                     <label>Комментарий</label>
-                    <textarea id="noteInput" placeholder="буквы"></textarea>
+                    <textarea id="noteInput" placeholder="Запись"></textarea>
                 </div>
                 <button type="button" id="addEntryBtn">Добавить</button>
                 <div class="success" id="addSuccess"></div>
@@ -460,7 +460,7 @@
                 const container = document.getElementById('entriesContainer');
                 
                 if (!data) {
-                    container.innerHTML = '<div class="no-data">Пока пусто</div>';
+                    container.innerHTML = '<div class="no-data">Пусто</div>';
                     document.getElementById('totalSum').textContent = '0';
                     return;
                 }

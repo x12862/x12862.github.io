@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Безопасный вход и трекер</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .setup-screen, .login-form, .app-content {
+            display: none;
+        }
+        
+        .setup-screen.active, .login-form.active, .app-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .logout-btn {
+            background: #e74c3c;
+            width: auto;
+            padding: 8px 20px;
+            font-size: 14px;
+            float: right;
+        }
+        
+        .summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .summary h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        .sum-display {
+            font-size: 32px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .message.active {
+            display: block;
+        }
+        
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .user-info {
+            color: #666;
+        }
+
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .info-box h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info-box p, .info-box ol {
+            color: #555;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        .info-box ol {
+            margin-left: 20px;
+        }
+
+        .info-box code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .info-box a {
+            color: #1976D2;
+            text-decoration: none;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+
+        small {
+            color: #888;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Screen -->
+        <div class="setup-screen active">
+            <h1>⚙️ Настройка GitHub (однократно)</h1>
+            
+            <div class="info-box">
+                <h3>📋 Инструкция по быстрой настройке:</h3>
+                <ol>
+                    <li>Перейдите на <a href="https://github.com/new" target="_blank">GitHub</a> и создайте <strong>приватный</strong> репозиторий (например, "tracker-data")</li>
+                    <li>Перейдите в <a href="https://github.com/settings/tokens/new" target="_blank">Настройки GitHub → Developer Settings → Personal Access Tokens → Tokens (classic)</a></li>
+                    <li>Нажмите "Generate new token (classic)"</li>
+                    <li>Дайте имя, например "Tracker App"</li>
+                    <li>Отметьте только область <code>repo</code> (полный контроль над приватными репозиториями)</li>
+                    <li>Нажмите "Generate token" и скопируйте его сразу (вы не увидите его снова!)</li>
+                </ol>
+            </div>
+
+            <div id="setupMessage" class="message"></div>
+            
+            <div class="form-group">
+                <label for="githubToken">Персональный токен доступа GitHub</label>
+                <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx">
+                <small>Будет сохранён локально в вашем браузере</small>
+            </div>
+
+            <div class="form-group">
+                <label for="githubRepo">Репозиторий (формат: имяпользователя/имя-репо)</label>
+                <input type="text" id="githubRepo" placeholder="ваше-имя/tracker-data">
+                <small>Пример: pashka/tracker-data</small>
+            </div>
+            
+            <button onclick="saveGitHubConfig()">Сохранить и продолжить</button>
+        </div>
+
+        <!-- Login Form -->
+        <div class="login-form">
+            <h1>🔐 Быстрый вход</h1>
+            <div id="loginMessage" class="message"></div>
+            <div class="form-group">
+                <label for="username">Имя пользователя</label>
+                <input type="text" id="username" placeholder="любое имя пользователя" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" placeholder="любой пароль" autocomplete="current-password">
+            </div>
+            <button onclick="quickLogin()">Войти / Зарегистрироваться</button>
+            <small style="text-align: center; margin-top: 10px;">Автоматически создаёт аккаунт, если имени пользователя не существует</small>
+        </div>
+
+        <!-- App Content -->
+        <div class="app-content">
+            <div class="header-bar">
+                <h1>📊 Трекер чисел</h1>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
+            <div class="user-info">Вы вошли как: <strong id="currentUser"></strong></div>
+            
+            <div id="appMessage" class="message"></div>
+            
+            <div class="form-group">
+                <label for="number">Число</label>
+                <input type="number" id="number" placeholder="Введите число" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="note">Заметка</label>
+                <textarea id="note" placeholder="Введите короткую заметку"></textarea>
+            </div>
+            <button onclick="addEntry()">Добавить запись</button>
+            
+            <div class="summary">
+                <h2>Общая сумма</h2>
+                <div class="sum-display" id="totalSum">0</div>
+            </div>
+            
+            <h2 style="margin-top: 30px; color: #333;">Ваши записи</h2>
+            <table id="entriesTable">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Число</th>
+                        <th>Заметка</th>
+                    </tr>
+                </thead>
+                <tbody id="entriesBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let config = {
+            token: null,
+            repo: null,
+            fileSha: null
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedConfig = localStorage.getItem('githubConfig');
+            if (savedConfig) {
+                config = JSON.parse(savedConfig);
+                showScreen('login-form');
+            } else {
+                showScreen('setup-screen');
+            }
+        });
+
+        function showScreen(screen) {
+            document.querySelectorAll('.setup-screen, .login-form, .app-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector('.' + screen).classList.add('active');
+        }
+
+        async function saveGitHubConfig() {
+            const token = document.getElementById('githubToken').value.trim();
+            const repo = document.getElementById('githubRepo').value.trim();
+            
+            if (!token || !repo) {
+                showMessage('setupMessage', 'Заполните оба поля', 'error');
+                return;
+            }
+
+            if (!repo.includes('/')) {
+                showMessage('setupMessage', 'Формат репозитория: имяпользователя/имя-репо', 'error');
+                return;
+            }
+
+            config.token = token;
+            config.repo = repo;
+
+            try {
+                await loadDataFromGitHub();
+                localStorage.setItem('githubConfig', JSON.stringify(config));
+                showMessage('setupMessage', 'Конфигурация успешно сохранена!', 'success');
+                setTimeout(() => showScreen('login-form'), 1500);
+            } catch (error) {
+                showMessage('setupMessage', 'Ошибка: ' + error.message + '. Проверьте ваш токен и имя репозитория.', 'error');
+            }
+        }
+
+        async function loadDataFromGitHub() {
+            const url = `https://api.github.com/repos/${config.repo}/contents/data.json`;
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${config.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.status === 404) {
+                    const initialData = { users: {} };
+                    await saveDataToGitHub(initialData);
+                    return initialData;
+                } else if (!response.ok) {
+                    throw new Error('Ошибка GitHub API: ' + response.status);
+                }
+
+                const fileData = await response.json();
+                config.fileSha = fileData.sha;
+                
+                const content = atob(fileData.content);
+                return JSON.parse(content);
+            } catch (error) {
+                throw new Error('Не удалось загрузить данные из GitHub: ' + error.message);
+            }
+        }
+
+        async function saveDataToGitHub(data) {
+            const url = `https://api.github.com/repos/${config.repo}/contents/data.json`;
+            const content = btoa(JSON.stringify(data, null, 2));
+            
+            const body = {
+                message: 'Обновление данных трекера',
+                content: content
+            };
+
+            if (config.fileSha) {
+                body.sha = config.fileSha;
+            }
+
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${config.token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error('Сохранение в GitHub не удалось: ' + (error.message || response.status));
+            }
+
+            const result = await response.json();
+            config.fileSha = result.content.sha;
+            localStorage.setItem('githubConfig', JSON.stringify(config));
+        }
+
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function quickLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showMessage('loginMessage', 'Пожалуйста, введите имя пользователя и пароль', 'error');
+                return;
+            }
+            
+            try {
+                const allData = await loadDataFromGitHub();
+                const passwordHash = await hashPassword(password);
+
+                if (!allData.users[username]) {
+                    allData.users[username] = {
+                        passwordHash: passwordHash,
+                        entries: []
+                    };
+                    await saveDataToGitHub(allData);
+                    showMessage('loginMessage', 'Аккаунт создан! Выполняется вход...', 'success');
+                } else {
+                    if (allData.users[username].passwordHash !== passwordHash) {
+                        showMessage('loginMessage', 'Неверный пароль', 'error');
+                        return;
+                    }
+                }
+                
+                currentUser = username;
+                document.getElementById('currentUser').textContent = username;
+                setTimeout(() => {
+                    showScreen('app-content');
+                    loadEntries();
+                }, 1000);
+            } catch (error) {
+                showMessage('loginMessage', 'Ошибка: ' + error.message, 'error');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showScreen('login-form');
+        }
+
+        async function addEntry() {
+            const number = parseFloat(document.getElementById('number').value);
+            const note = document.getElementById('note').value.trim();
+            
+            if (isNaN(number)) {
+                showMessage('appMessage', 'Пожалуйста, введите корректное число', 'error');
+                return;
+            }
+            
+            if (!note) {
+                showMessage('appMessage', 'Пожалуйста, введите заметку', 'error');
+                return;
+            }
+            
+            try {
+                const allData = await loadDataFromGitHub();
+                
+                const entry = {
+                    date: new Date().toISOString(),
+                    number: number,
+                    note: note
+                };
+                
+                allData.users[currentUser].entries.push(entry);
+                await saveDataToGitHub(allData);
+                
+                document.getElementById('number').value = '';
+                document.getElementById('note').value = '';
+                
+                showMessage('appMessage', 'Запись успешно добавлена!', 'success');
+                await loadEntries();
+            } catch (error) {
+                showMessage('appMessage', 'Ошибка: ' + error.message, 'error');
+            }
+        }
+
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+
+        async function loadEntries() {
+            try {
+                const allData = await loadDataFromGitHub();
+                const entries = allData.users[currentUser].entries || [];
+                
+                const sum = entries.reduce((acc, entry) => acc + entry.number, 0);
+                document.getElementById('totalSum').textContent = sum.toFixed(2);
+                
+                const tbody = document.getElementById('entriesBody');
+                tbody.innerHTML = '';
+                
+                [...entries].reverse().forEach(entry => {
+                    const row = tbody.insertRow();
+                    const dateCell = row.insertCell(0);
+                    const numberCell = row.insertCell(1);
+                    const noteCell = row.insertCell(2);
+                    
+                    dateCell.textContent = formatDate(entry.date);
+                    numberCell.textContent = entry.number.toFixed(2);
+                    noteCell.textContent = entry.note;
+                });
+            } catch (error) {
+                showMessage('appMessage', 'Ошибка загрузки записей: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(elementId, text, type) {
+            const messageEl = document.getElementById(elementId);
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} active`;
+            setTimeout(() => {
+                messageEl.classList.remove('active');
+            }, 3000);
+        }
+
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') quickLogin();
+        });
+    </script>
+</body>
+</html>

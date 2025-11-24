@@ -1,3 +1,87 @@
+I have a github site at x12862.github.io I want to introduce secure login. After logging in user should be able to write a number, and a short note. That information should added to database that user can access later, a well as sum of all the numbers added together and dates the note was added to the database in the table format
+
+I'll help you create a secure login system for your GitHub Pages site with a database for storing numbers and notes. Since GitHub Pages only hosts static files, we'll need to use a backend service. I'll create a solution using Firebase, which provides authentication and a real-time database.
+
+Secure Notes & Numbers Tracker
+Interactive artifact 
+I've created a secure login system with database functionality for your GitHub Pages site. Here's what you need to do to set it up:
+
+Setup Instructions:
+1. Create a Firebase Project (Free)
+Go to Firebase Console
+Click "Add project" and follow the setup
+Choose a name (e.g., "notes-tracker")
+2. Enable Authentication
+In Firebase Console, go to "Authentication" → "Get Started"
+Click "Sign-in method" tab
+Enable "Email/Password"
+3. Enable Realtime Database
+Go to "Realtime Database" → "Create Database"
+Start in "test mode" (you can secure it later)
+Note the database URL
+4. Get Firebase Config
+Go to Project Settings (gear icon)
+Scroll to "Your apps" → Click web icon (</>)
+Copy the firebaseConfig object
+Replace the config in the code (lines 298-305)
+5. Deploy to GitHub Pages
+Save the HTML file as index.html
+Push to your x12862.github.io repository
+Access at https://x12862.github.io
+Features Included:
+✅ Secure Authentication - Email/password login and signup
+✅ Add Entries - Input numbers and notes
+✅ Total Sum - Automatically calculates sum of all numbers
+✅ Date Tracking - Records when each entry was added
+✅ Table View - Shows all entries with dates
+✅ Delete Function - Remove individual entries
+✅ User Isolation - Each user only sees their own data
+
+The app uses Firebase's secure authentication and stores data in their cloud database, making it perfect for static GitHub Pages hosting!
+
+2 issues. 
+(1) I've created account at Firebase. And pushed it to x12862.github.io/db/index.html
+I see the page, but none of the buttons work for login or Sign up. 
+
+(2) Site is too bright. I want minimalistic interface in dark mode, no pictures, with a bit of red highlights
+
+Secure Notes & Numbers Tracker
+Interactive artifact ∙ Version 2 
+I've fixed both issues:
+
+Issue 1 - Buttons Not Working ✅
+The problem was that I was using onclick attributes which don't work well with ES6 modules. I've now:
+
+Added proper event listeners using addEventListener
+Removed all onclick attributes
+Changed button types to type="button" to prevent form submission
+Issue 2 - Dark Mode with Red Highlights ✅
+Complete redesign with:
+
+Dark background: Near-black (
+#0a0a0a) with dark gray containers
+Minimalist: Clean lines, no gradients or images
+Red accents: 
+#cc3333 for buttons, links, and the total sum
+Subtle borders: Dark gray borders (
+#2a2a2a)
+Clean typography: System fonts, simple hierarchy
+Now make sure you:
+
+Replace the Firebase config (lines 298-305) with your actual values from Firebase Console
+Check browser console (F12) for any error messages if buttons still don't work
+Verify your Firebase project has Authentication and Realtime Database enabled
+Let me know if the buttons still aren't working - we can troubleshoot the Firebase configuration!
+
+
+
+How can I help you today?
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,8 +96,9 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
             min-height: 100vh;
             padding: 20px;
         }
@@ -21,21 +106,28 @@
         .container {
             max-width: 900px;
             margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
             overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #141414;
+            color: #e0e0e0;
             padding: 30px;
-            text-align: center;
+            border-bottom: 1px solid #2a2a2a;
         }
         
         .header h1 {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            color: #888;
+            font-size: 14px;
         }
         
         .content {
@@ -50,6 +142,12 @@
             display: block;
         }
         
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
@@ -57,81 +155,96 @@
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
+            font-size: 14px;
+            color: #b0b0b0;
         }
         
         input, textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 15px;
+            transition: border-color 0.2s;
         }
         
         input:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #cc3333;
         }
         
         textarea {
             resize: vertical;
             min-height: 80px;
+            font-family: inherit;
         }
         
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #cc3333;
+            color: #ffffff;
             border: none;
-            padding: 12px 30px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: background 0.2s;
         }
         
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: #b82e2e;
         }
         
         button:active {
-            transform: translateY(0);
+            background: #a32929;
         }
         
         .btn-secondary {
-            background: #6c757d;
+            background: #2a2a2a;
             margin-left: 10px;
         }
         
+        .btn-secondary:hover {
+            background: #333;
+        }
+        
         .btn-danger {
-            background: #dc3545;
+            background: #cc3333;
         }
         
         .user-info {
-            background: #f8f9fa;
+            background: #141414;
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 4px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid #2a2a2a;
         }
         
         .summary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #141414;
+            border: 1px solid #cc3333;
             padding: 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
             text-align: center;
+        }
+        
+        .summary p {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 5px;
         }
         
         .summary h3 {
             font-size: 36px;
-            margin-top: 10px;
+            margin-top: 5px;
+            color: #cc3333;
+            font-weight: 600;
         }
         
         table {
@@ -143,27 +256,32 @@
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #2a2a2a;
         }
         
         th {
-            background: #f8f9fa;
+            background: #141414;
             font-weight: 600;
-            color: #333;
+            color: #b0b0b0;
+            font-size: 14px;
+        }
+        
+        td {
+            color: #e0e0e0;
         }
         
         tr:hover {
-            background: #f8f9fa;
+            background: #141414;
         }
         
         .error {
-            color: #dc3545;
+            color: #cc3333;
             margin-top: 10px;
             font-size: 14px;
         }
         
         .success {
-            color: #28a745;
+            color: #4a9960;
             margin-top: 10px;
             font-size: 14px;
         }
@@ -171,11 +289,12 @@
         .auth-toggle {
             text-align: center;
             margin-top: 15px;
-            color: #666;
+            color: #888;
+            font-size: 14px;
         }
         
         .auth-toggle a {
-            color: #667eea;
+            color: #cc3333;
             cursor: pointer;
             text-decoration: none;
         }
@@ -188,19 +307,28 @@
             text-align: center;
             color: #666;
             padding: 40px;
+            font-size: 14px;
         }
         
         .delete-btn {
-            background: #dc3545;
+            background: #cc3333;
             padding: 6px 12px;
-            font-size: 14px;
+            font-size: 13px;
+        }
+
+        .delete-btn:hover {
+            background: #b82e2e;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #555;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Notes & Numbers Tracker</h1>
+            <h1>Notes & Numbers Tracker</h1>
             <p>Securely track your numbers and notes</p>
         </div>
         
@@ -217,10 +345,10 @@
                         <label>Password</label>
                         <input type="password" id="loginPassword" placeholder="Enter your password">
                     </div>
-                    <button onclick="login()">Login</button>
+                    <button type="button" id="loginBtn">Login</button>
                     <div class="error" id="loginError"></div>
                     <div class="auth-toggle">
-                        Don't have an account? <a onclick="toggleAuth()">Sign up</a>
+                        Don't have an account? <a id="showSignup">Sign up</a>
                     </div>
                 </div>
                 
@@ -234,11 +362,11 @@
                         <label>Password</label>
                         <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)">
                     </div>
-                    <button onclick="signup()">Sign Up</button>
+                    <button type="button" id="signupBtn">Sign Up</button>
                     <div class="error" id="signupError"></div>
                     <div class="success" id="signupSuccess"></div>
                     <div class="auth-toggle">
-                        Already have an account? <a onclick="toggleAuth()">Login</a>
+                        Already have an account? <a id="showLogin">Login</a>
                     </div>
                 </div>
             </div>
@@ -247,7 +375,7 @@
             <div class="app-section" id="appSection">
                 <div class="user-info">
                     <span>Logged in as: <strong id="userEmail"></strong></span>
-                    <button class="btn-danger" onclick="logout()">Logout</button>
+                    <button class="btn-danger" id="logoutBtn">Logout</button>
                 </div>
                 
                 <div class="summary">
@@ -264,7 +392,7 @@
                     <label>Note</label>
                     <textarea id="noteInput" placeholder="Enter your note"></textarea>
                 </div>
-                <button onclick="addEntry()">Add Entry</button>
+                <button type="button" id="addEntryBtn">Add Entry</button>
                 <div class="success" id="addSuccess"></div>
                 
                 <h2 style="margin-top: 40px;">Your Entries</h2>
@@ -280,11 +408,6 @@
         import { getDatabase, ref, push, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         // x12-862 Firebase config
-		import { initializeApp } from "firebase/app";
-		// TODO: Add SDKs for Firebase products that you want to use
-		// https://firebase.google.com/docs/web/setup#available-libraries
-
-		// Your web app's Firebase configuration
 		const firebaseConfig = {
 		  apiKey: "AIzaSyC7asAazIQlmOqih2SzLkQgow_kjRkKm8o",
 		  authDomain: "x12-862.firebaseapp.com",
@@ -299,16 +422,16 @@
         const auth = getAuth(app);
         const database = getDatabase(app);
 
-        window.currentUser = null;
+        let currentUser = null;
 
         // Auth state observer
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                window.currentUser = user;
+                currentUser = user;
                 showApp();
                 loadEntries();
             } else {
-                window.currentUser = null;
+                currentUser = null;
                 showAuth();
             }
         });
@@ -321,10 +444,10 @@
         function showApp() {
             document.getElementById('authSection').classList.remove('active');
             document.getElementById('appSection').classList.add('active');
-            document.getElementById('userEmail').textContent = window.currentUser.email;
+            document.getElementById('userEmail').textContent = currentUser.email;
         }
 
-        window.toggleAuth = function() {
+        function toggleAuth() {
             const loginForm = document.getElementById('loginForm');
             const signupForm = document.getElementById('signupForm');
             if (loginForm.style.display === 'none') {
@@ -337,9 +460,13 @@
             document.getElementById('loginError').textContent = '';
             document.getElementById('signupError').textContent = '';
             document.getElementById('signupSuccess').textContent = '';
-        };
+        }
 
-        window.signup = async function() {
+        // Event listeners
+        document.getElementById('showSignup').addEventListener('click', toggleAuth);
+        document.getElementById('showLogin').addEventListener('click', toggleAuth);
+
+        document.getElementById('signupBtn').addEventListener('click', async function() {
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
             const errorDiv = document.getElementById('signupError');
@@ -351,13 +478,13 @@
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
                 successDiv.textContent = 'Account created successfully!';
-                setTimeout(() => window.toggleAuth(), 1500);
+                setTimeout(() => toggleAuth(), 1500);
             } catch (error) {
                 errorDiv.textContent = error.message;
             }
-        };
+        });
 
-        window.login = async function() {
+        document.getElementById('loginBtn').addEventListener('click', async function() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const errorDiv = document.getElementById('loginError');
@@ -369,17 +496,17 @@
             } catch (error) {
                 errorDiv.textContent = error.message;
             }
-        };
+        });
 
-        window.logout = async function() {
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
             try {
                 await signOut(auth);
             } catch (error) {
                 console.error('Logout error:', error);
             }
-        };
+        });
 
-        window.addEntry = async function() {
+        document.getElementById('addEntryBtn').addEventListener('click', async function() {
             const number = parseFloat(document.getElementById('numberInput').value);
             const note = document.getElementById('noteInput').value;
             const successDiv = document.getElementById('addSuccess');
@@ -393,11 +520,11 @@
                 number: number,
                 note: note,
                 date: new Date().toISOString(),
-                userId: window.currentUser.uid
+                userId: currentUser.uid
             };
 
             try {
-                const entriesRef = ref(database, 'entries/' + window.currentUser.uid);
+                const entriesRef = ref(database, 'entries/' + currentUser.uid);
                 await push(entriesRef, entry);
                 
                 document.getElementById('numberInput').value = '';
@@ -407,10 +534,10 @@
             } catch (error) {
                 alert('Error adding entry: ' + error.message);
             }
-        };
+        });
 
-        window.loadEntries = function() {
-            const entriesRef = ref(database, 'entries/' + window.currentUser.uid);
+        function loadEntries() {
+            const entriesRef = ref(database, 'entries/' + currentUser.uid);
             
             onValue(entriesRef, (snapshot) => {
                 const data = snapshot.val();
@@ -445,28 +572,35 @@
                             <td>${date}</td>
                             <td>${entry.number}</td>
                             <td>${entry.note}</td>
-                            <td><button class="delete-btn" onclick="deleteEntry('${entry.id}')">Delete</button></td>
+                            <td><button class="delete-btn" data-id="${entry.id}">Delete</button></td>
                         </tr>
                     `;
                 });
                 
                 html += '</tbody></table>';
                 container.innerHTML = html;
-            });
-        };
 
-        window.deleteEntry = async function(entryId) {
+                // Add delete button listeners
+                container.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        deleteEntry(this.getAttribute('data-id'));
+                    });
+                });
+            });
+        }
+
+        async function deleteEntry(entryId) {
             if (!confirm('Are you sure you want to delete this entry?')) {
                 return;
             }
 
             try {
-                const entryRef = ref(database, 'entries/' + window.currentUser.uid + '/' + entryId);
+                const entryRef = ref(database, 'entries/' + currentUser.uid + '/' + entryId);
                 await remove(entryRef);
             } catch (error) {
                 alert('Error deleting entry: ' + error.message);
             }
-        };
+        }
     </script>
 </body>
 </html>

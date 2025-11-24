@@ -460,7 +460,7 @@
                 const container = document.getElementById('entriesContainer');
                 
                 if (!data) {
-                    container.innerHTML = '<div class="no-data">Пока тут пусто</div>';
+                    container.innerHTML = '<div class="no-data">Пока пусто</div>';
                     document.getElementById('totalSum').textContent = '0';
                     return;
                 }
@@ -475,7 +475,7 @@
                 const total = entries.reduce((sum, entry) => sum + (entry.number || 0), 0);
                 document.getElementById('totalSum').textContent = total.toFixed(2);
 
-                let html = '<table><thead><tr><th>Дата</th><th>Номер</th><th>Комментарий</th><th>Действие</th></tr></thead><tbody>';
+                let html = '<table><thead><tr><th>День</th><th>Номер</th><th>Комментарий</th><th>Действие</th></tr></thead><tbody>';
                 
                 entries.forEach(entry => {
                     const date = new Date(entry.date).toLocaleDateString('en-CA', {
@@ -514,7 +514,7 @@
                 const entryRef = ref(database, 'entries/' + currentUser.uid + '/' + entryId);
                 await remove(entryRef);
             } catch (error) {
-                alert('Не получилось удалить: ' + error.message);
+                alert('Не получилось' + error.message);
             }
         }
     </script>
